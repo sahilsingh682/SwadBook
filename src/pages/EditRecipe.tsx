@@ -58,7 +58,7 @@ export default function EditRecipe() {
     await fetchRecipeWithAdmin(adminStatus);
   };
 
-  const fetchRecipe = async () => {
+  const fetchRecipeWithAdmin = async (adminStatus: boolean) => {
     try {
       const { data, error } = await supabase
         .from('recipes')

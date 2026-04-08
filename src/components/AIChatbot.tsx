@@ -155,7 +155,7 @@ export function AIChatbot() {
                 placeholder="Ask about diet and nutrition..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 disabled={isLoading}
                 className="flex-1"
               />

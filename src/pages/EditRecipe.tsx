@@ -73,8 +73,8 @@ export default function EditRecipe() {
         return;
       }
 
-      // Check permission
-      if (data.author_id !== user?.id && !isAdmin) {
+      // Check permission using passed-in admin status (not stale state)
+      if (data.author_id !== user?.id && !adminStatus) {
         toast.error('You do not have permission to edit this recipe');
         navigate('/');
         return;

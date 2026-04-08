@@ -6,6 +6,9 @@
     <title>Recipe Rebel - Share Your Culinary Creations</title>
     <meta name="description" content="Join Recipe Rebel to share recipes, discover new dishes, and get personalized diet advice from our AI Dietician. A community for food lovers." />
     <meta name="author" content="Recipe Rebel" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
     <meta property="og:title" content="Recipe Rebel - Share Your Culinary Creations" />
     <meta property="og:description" content="Join Recipe Rebel to share recipes, discover new dishes, and get personalized diet advice from our AI Dietician." />
@@ -15,9 +18,85 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <style>
+      /* Preloader styles - inline for instant display */
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a0f0a 0%, #2d1810 50%, #1a0f0a 100%);
+        transition: opacity 0.6s ease, visibility 0.6s ease;
+      }
+      #preloader.loaded {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .preloader-logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+        margin-bottom: 2rem;
+        opacity: 0;
+        animation: preloaderFadeIn 0.8s ease forwards 0.2s;
+      }
+      .preloader-logo span {
+        color: #e8632b;
+      }
+      .preloader-spinner {
+        width: 48px;
+        height: 48px;
+        position: relative;
+        opacity: 0;
+        animation: preloaderFadeIn 0.6s ease forwards 0.5s;
+      }
+      .preloader-spinner::before,
+      .preloader-spinner::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+      }
+      .preloader-spinner::before {
+        inset: 0;
+        border: 3px solid rgba(232, 99, 43, 0.15);
+      }
+      .preloader-spinner::after {
+        inset: 0;
+        border: 3px solid transparent;
+        border-top-color: #e8632b;
+        animation: preloaderSpin 0.8s linear infinite;
+      }
+      .preloader-tagline {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        color: rgba(255,255,255,0.5);
+        margin-top: 1.5rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: preloaderFadeIn 0.6s ease forwards 0.8s;
+      }
+      @keyframes preloaderSpin {
+        to { transform: rotate(360deg); }
+      }
+      @keyframes preloaderFadeIn {
+        to { opacity: 1; }
+      }
+    </style>
   </head>
 
   <body>
+    <div id="preloader">
+      <div class="preloader-logo">Recipe <span>Rebel</span></div>
+      <div class="preloader-spinner"></div>
+      <div class="preloader-tagline">Crafting Flavors</div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -3,3 +3,10 @@ import App from "./App.tsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Hide preloader once app mounts
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    document.getElementById("preloader")?.classList.add("loaded");
+  }, 1200);
+});

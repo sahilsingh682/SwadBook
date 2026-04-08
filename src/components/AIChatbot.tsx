@@ -144,6 +144,7 @@ export function AIChatbot() {
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
 

@@ -35,7 +35,7 @@ export function Layout({ children }: LayoutProps) {
             </span>
           </Link>
 
-          {user && (
+          {user ? (
             <nav className="flex items-center gap-1">
               <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="transition-smooth text-muted-foreground hover:text-foreground">
                 <Home className="h-4 w-4 mr-1.5" />
@@ -61,6 +61,10 @@ export function Layout({ children }: LayoutProps) {
                 <span className="hidden sm:inline text-sm">Sign Out</span>
               </Button>
             </nav>
+          ) : (
+            <Button size="sm" onClick={() => navigate('/auth')} className="shadow-warm">
+              Sign In
+            </Button>
           )}
         </div>
       </header>

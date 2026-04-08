@@ -44,18 +44,16 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) return;
-    try {
-      if (isFavorite) {
-        await supabase.from('favorites').delete().eq('recipe_id', recipe.id).eq('user_id', user.id);
-        toast.success('Removed from favorites');
-      } else {
-        await supabase.from('favorites').insert({ recipe_id: recipe.id, user_id: user.id });
-        toast.success('Added to favorites');
-      }
-      setIsFavorite(!isFavorite);
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      toast.error('Failed to update favorites');
+    if (isFavorite) {
+      const { error } = await supabase.from('favorites').delete().eq('recipe_id', recipe.id).eq('user_id', user.id);
+      if (error) { toast.error('Failed to update favorites'); return; }
+      toast.success('Removed from favorites');
+      setIsFavorite(false);
+    } else {
+      const { error } = await supabase.from('favorites').insert({ recipe_id: recipe.id, user_id: user.id });
+      if (error) { toast.error('Failed to update favorites'); return; }
+      toast.success('Added to favorites');
+      setIsFavorite(true);
     }
   };
 

@@ -40,23 +40,25 @@ export default function EditRecipe() {
 
   useEffect(() => {
     if (id && user) {
-      fetchRecipe();
-      checkAdminRole();
+      loadData();
     }
   }, [id, user]);
 
-  const checkAdminRole = async () => {
+  const loadData = async () => {
     if (!user) return;
-    const { data } = await supabase
+    // Check admin role FIRST before fetching recipe (which depends on it)
+    const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
       .maybeSingle();
-    setIsAdmin(!!data);
+    const adminStatus = !!roleData;
+    setIsAdmin(adminStatus);
+    await fetchRecipeWithAdmin(adminStatus);
   };
 
-  const fetchRecipe = async () => {
+  const fetchRecipeWithAdmin = async (adminStatus: boolean) => {
     try {
       const { data, error } = await supabase
         .from('recipes')
@@ -71,8 +73,8 @@ export default function EditRecipe() {
         return;
       }
 
-      // Check permission
-      if (data.author_id !== user?.id && !isAdmin) {
+      // Check permission using passed-in admin status (not stale state)
+      if (data.author_id !== user?.id && !adminStatus) {
         toast.error('You do not have permission to edit this recipe');
         navigate('/');
         return;

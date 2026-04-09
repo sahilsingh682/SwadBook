@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Home, Upload, User, LogOut, Shield, Flame } from 'lucide-react';
+import { ChefHat, Home, Upload, User, LogOut, Shield } from 'lucide-react';
 import { AIChatbot } from './AIChatbot';
 
 interface LayoutProps {

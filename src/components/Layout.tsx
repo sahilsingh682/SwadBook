@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { ChefHat, Home, Upload, User, LogOut, Shield, Flame } from 'lucide-react';
@@ -12,6 +12,10 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/auth' || location.pathname === '/reset-password';
+
+  if (isAuthPage) return <>{children}</>;
 
   const handleSignOut = async () => {
     try {

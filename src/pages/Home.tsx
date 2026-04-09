@@ -65,7 +65,7 @@ export default function Home() {
     return (
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Flame className="h-8 w-8 text-primary animate-pulse" />
+          <ChefHat className="h-8 w-8 text-primary animate-pulse" />
           <p className="text-muted-foreground text-sm">Loading...</p>
         </div>
       </div>

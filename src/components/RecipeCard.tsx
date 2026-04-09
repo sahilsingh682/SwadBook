@@ -59,7 +59,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
   return (
     <Card
-      className="overflow-hidden border bg-card cursor-pointer group shadow-card hover:shadow-card-hover transition-smooth"
+      className="overflow-hidden border bg-card cursor-pointer group shadow-card hover:shadow-card-hover transition-smooth h-full flex flex-col"
       onClick={() => navigate(`/recipe/${recipe.id}`)}
     >
       {/* Image */}
@@ -98,7 +98,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <h3 className="font-display font-semibold text-lg mb-2 line-clamp-1 group-hover:text-primary transition-smooth">
           {recipe.title}
         </h3>
@@ -115,7 +115,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mt-auto">
           {recipe.ingredients.slice(0, 3).map((ingredient, idx) => (
             <Badge key={idx} variant="secondary" className="text-xs font-normal px-2 py-0.5 rounded-full">
               {ingredient}

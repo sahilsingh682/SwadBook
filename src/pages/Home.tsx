@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RecipeCard } from '@/components/RecipeCard';
-import { Search, Plus, SlidersHorizontal, ArrowRight, Flame, Utensils, Sparkles } from 'lucide-react';
+import { Search, Plus, SlidersHorizontal, ArrowRight, ChefHat, Utensils, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -65,7 +65,7 @@ export default function Home() {
     return (
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Flame className="h-8 w-8 text-primary animate-pulse" />
+          <ChefHat className="h-8 w-8 text-primary animate-pulse" />
           <p className="text-muted-foreground text-sm">Loading...</p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function Home() {
               {[
                 { icon: Utensils, title: 'Share Recipes', desc: 'Upload your creations with photos, ingredients, and step-by-step instructions.' },
                 { icon: Sparkles, title: 'AI Dietician', desc: 'Get personalized nutrition advice and meal recommendations powered by AI.' },
-                { icon: Flame, title: 'Community', desc: 'Rate, comment, and save your favorite recipes from talented home cooks.' },
+                { icon: ChefHat, title: 'Community', desc: 'Rate, comment, and save your favorite recipes from talented home cooks.' },
               ].map((f, i) => (
                 <div key={i} className="text-center p-6 rounded-xl border bg-card shadow-card opacity-0 animate-fade-up" style={{ animationDelay: `${0.2 + i * 0.15}s` }}>
                   <div className="inline-flex items-center justify-center h-12 w-12 rounded-lg gradient-primary mb-4">

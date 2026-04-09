@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Home, Upload, User, LogOut, Shield, Flame } from 'lucide-react';
+import { ChefHat, Home, Upload, User, LogOut, Shield } from 'lucide-react';
 import { AIChatbot } from './AIChatbot';
 
 interface LayoutProps {
@@ -31,8 +31,8 @@ export function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-40 border-b bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center shadow-warm group-hover:scale-105 transition-smooth">
-              <Flame className="h-5 w-5 text-primary-foreground" />
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-smooth">
+              <ChefHat className="h-5 w-5 text-primary" />
             </div>
             <span className="font-display text-xl font-bold tracking-tight">
               Recipe <span className="text-gradient">Rebel</span>
@@ -84,8 +84,8 @@ export function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-primary" />
-              <span className="font-display font-semibold text-sm">Recipe Rebel</span>
+              <ChefHat className="h-4 w-4 text-primary" />
+              <span className="font-display font-semibold text-sm">Recipe <span className="text-primary">Rebel</span></span>
             </div>
             <p className="text-xs text-muted-foreground">
               Made with ❤️ by Team Recipe Rebel &nbsp;·&nbsp; © 2025 All rights reserved

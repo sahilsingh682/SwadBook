@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RecipeCard } from '@/components/RecipeCard';
-import { Search, Plus, SlidersHorizontal, ArrowRight, Flame, Utensils, Sparkles } from 'lucide-react';
+import { Search, Plus, SlidersHorizontal, ArrowRight, ChefHat, Utensils, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';

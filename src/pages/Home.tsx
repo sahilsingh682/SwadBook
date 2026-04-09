@@ -121,7 +121,7 @@ export default function Home() {
               {[
                 { icon: Utensils, title: 'Share Recipes', desc: 'Upload your creations with photos, ingredients, and step-by-step instructions.' },
                 { icon: Sparkles, title: 'AI Dietician', desc: 'Get personalized nutrition advice and meal recommendations powered by AI.' },
-                { icon: Flame, title: 'Community', desc: 'Rate, comment, and save your favorite recipes from talented home cooks.' },
+                { icon: ChefHat, title: 'Community', desc: 'Rate, comment, and save your favorite recipes from talented home cooks.' },
               ].map((f, i) => (
                 <div key={i} className="text-center p-6 rounded-xl border bg-card shadow-card opacity-0 animate-fade-up" style={{ animationDelay: `${0.2 + i * 0.15}s` }}>
                   <div className="inline-flex items-center justify-center h-12 w-12 rounded-lg gradient-primary mb-4">

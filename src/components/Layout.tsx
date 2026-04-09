@@ -12,6 +12,10 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/auth' || location.pathname === '/reset-password';
+
+  if (isAuthPage) return <>{children}</>;
 
   const handleSignOut = async () => {
     try {

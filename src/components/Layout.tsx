@@ -31,8 +31,8 @@ export function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-40 border-b bg-card/80 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center shadow-warm group-hover:scale-105 transition-smooth">
-              <Flame className="h-5 w-5 text-primary-foreground" />
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-smooth">
+              <ChefHat className="h-5 w-5 text-primary" />
             </div>
             <span className="font-display text-xl font-bold tracking-tight">
               Recipe <span className="text-gradient">Rebel</span>

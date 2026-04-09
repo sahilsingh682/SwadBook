@@ -115,7 +115,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mt-auto">
           {recipe.ingredients.slice(0, 3).map((ingredient, idx) => (
             <Badge key={idx} variant="secondary" className="text-xs font-normal px-2 py-0.5 rounded-full">
               {ingredient}

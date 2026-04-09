@@ -84,8 +84,8 @@ export function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-primary" />
-              <span className="font-display font-semibold text-sm">Recipe Rebel</span>
+              <ChefHat className="h-4 w-4 text-primary" />
+              <span className="font-display font-semibold text-sm">Recipe <span className="text-primary">Rebel</span></span>
             </div>
             <p className="text-xs text-muted-foreground">
               Made with ❤️ by Team Recipe Rebel &nbsp;·&nbsp; © 2025 All rights reserved

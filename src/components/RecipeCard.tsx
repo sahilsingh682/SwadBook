@@ -59,7 +59,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
   return (
     <Card
-      className="overflow-hidden border bg-card cursor-pointer group shadow-card hover:shadow-card-hover transition-smooth"
+      className="overflow-hidden border bg-card cursor-pointer group shadow-card hover:shadow-card-hover transition-smooth h-full flex flex-col"
       onClick={() => navigate(`/recipe/${recipe.id}`)}
     >
       {/* Image */}

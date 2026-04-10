@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X } from 'lucide-react';
+import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X, ArrowLeft, Heart, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { commentSchema } from '@/lib/validations';
 import {
@@ -31,6 +31,8 @@ export default function RecipeDetail() {
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [commentLoading, setCommentLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -39,6 +41,7 @@ export default function RecipeDetail() {
       if (user) {
         fetchUserRating();
         checkAdminRole();
+        checkFavorite();
       }
     }
   }, [id, user]);
@@ -52,6 +55,36 @@ export default function RecipeDetail() {
       .eq('role', 'admin')
       .maybeSingle();
     setIsAdmin(!!data);
+  };
+
+  const checkFavorite = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('recipe_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    setIsFavorite(!!data);
+  };
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast.error('Please sign in to save favorites');
+      navigate('/auth');
+      return;
+    }
+    if (isFavorite) {
+      const { error } = await supabase.from('favorites').delete().eq('recipe_id', id).eq('user_id', user.id);
+      if (error) { toast.error('Failed to update favorites'); return; }
+      toast.success('Removed from favorites');
+      setIsFavorite(false);
+    } else {
+      const { error } = await supabase.from('favorites').insert({ recipe_id: id, user_id: user.id });
+      if (error) { toast.error('Failed to update favorites'); return; }
+      toast.success('Added to favorites');
+      setIsFavorite(true);
+    }
   };
 
   const fetchRecipe = async () => {
@@ -83,21 +116,47 @@ export default function RecipeDetail() {
   };
 
   const handleRate = async (rating: number) => {
-    if (!user) return;
-    
-    const { error } = await supabase
+    if (!user) {
+      toast.error('Please sign in to rate recipes');
+      navigate('/auth');
+      return;
+    }
+
+    const { data: existing } = await supabase
       .from('ratings')
-      .upsert({ recipe_id: id, user_id: user.id, rating });
+      .select('id')
+      .eq('recipe_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      ({ error } = await supabase
+        .from('ratings')
+        .update({ rating })
+        .eq('recipe_id', id)
+        .eq('user_id', user.id));
+    } else {
+      ({ error } = await supabase
+        .from('ratings')
+        .insert({ recipe_id: id, user_id: user.id, rating }));
+    }
 
     if (!error) {
       setUserRating(rating);
       toast.success('Rating saved!');
       fetchRecipe();
+    } else {
+      toast.error('Failed to save rating');
     }
   };
 
   const handleComment = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Please sign in to comment');
+      navigate('/auth');
+      return;
+    }
 
     const validationResult = commentSchema.safeParse({ text: newComment });
     if (!validationResult.success) {
@@ -105,6 +164,7 @@ export default function RecipeDetail() {
       return;
     }
 
+    setCommentLoading(true);
     const { error } = await supabase
       .from('comments')
       .insert({ recipe_id: id, user_id: user.id, text: validationResult.data.text });
@@ -113,12 +173,14 @@ export default function RecipeDetail() {
       setNewComment('');
       fetchComments();
       toast.success('Comment added!');
+    } else {
+      toast.error('Failed to add comment');
     }
+    setCommentLoading(false);
   };
 
   const handleDownloadIngredients = () => {
     if (!recipe) return;
-    
     const content = `Ingredients for: ${recipe.title}\n\n${recipe.ingredients.map((ing: string, idx: number) => `${idx + 1}. ${ing}`).join('\n')}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -134,12 +196,7 @@ export default function RecipeDetail() {
 
   const handleDelete = async () => {
     if (!recipe) return;
-    
-    const { error } = await supabase
-      .from('recipes')
-      .delete()
-      .eq('id', recipe.id);
-
+    const { error } = await supabase.from('recipes').delete().eq('id', recipe.id);
     if (!error) {
       toast.success('Recipe deleted successfully');
       navigate('/');
@@ -150,144 +207,189 @@ export default function RecipeDetail() {
 
   const canEditDelete = user && (user.id === recipe?.author_id || isAdmin);
 
-  if (!recipe) return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  if (!recipe) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <ChefHat className="h-8 w-8 text-primary animate-pulse" />
+          <p className="text-muted-foreground text-sm">Loading recipe...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Card className="shadow-card mb-6 relative">
-        {/* Edit/Delete Icons */}
-        {canEditDelete && (
-          <div className="absolute top-4 right-4 z-10 flex gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => navigate(`/recipe/${id}/edit`)}
-              className="bg-background/80 backdrop-blur-sm"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="bg-destructive/80 backdrop-blur-sm"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete this recipe? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        )}
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Back button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => navigate(-1)}
+        className="mb-4 gap-2 text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Button>
 
-        <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+      {/* Hero Image */}
+      <div className="relative rounded-2xl overflow-hidden mb-6 shadow-card">
+        <div className="aspect-video w-full">
           {recipe.image_url ? (
             <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
+            <div className="w-full h-full gradient-primary flex items-center justify-center">
               <span className="text-8xl">🍳</span>
             </div>
           )}
         </div>
-        <CardContent className="p-6 space-y-4">
-          <h1 className="text-4xl font-display font-bold">{recipe.title}</h1>
-          
-          <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-            <div className="flex items-center gap-1">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+        {/* Floating actions */}
+        <div className="absolute top-4 right-4 flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-card/70 backdrop-blur-sm hover:bg-card shadow-sm"
+            onClick={toggleFavorite}
+          >
+            <Heart className={`h-5 w-5 ${isFavorite ? 'fill-primary text-primary' : 'text-foreground'}`} />
+          </Button>
+          {canEditDelete && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full bg-card/70 backdrop-blur-sm hover:bg-card shadow-sm"
+                onClick={() => navigate(`/recipe/${id}/edit`)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-full bg-destructive/70 backdrop-blur-sm hover:bg-destructive shadow-sm text-destructive-foreground"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this recipe? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+        </div>
+
+        {/* Title overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">{recipe.title}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-white/90 text-sm">
               <User className="h-4 w-4" />
-              <span>{recipe.profiles?.name}</span>
+              <span>{recipe.profiles?.name || 'Anonymous Chef'}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <span className="text-white/40">·</span>
+            <div className="flex items-center gap-1.5 text-white/90 text-sm">
               <Clock className="h-4 w-4" />
               <span>{recipe.preparation_time} min</span>
             </div>
-            <div className="flex items-center gap-1">
+            <span className="text-white/40">·</span>
+            <div className="flex items-center gap-1.5 text-white/90 text-sm">
               <Star className="h-4 w-4 fill-accent text-accent" />
-              <span>{recipe.average_rating?.toFixed(1) || '0.0'}</span>
+              <span>{(recipe.average_rating ?? 0).toFixed(1)}</span>
             </div>
             {recipe.meal_type && (
-              <Badge variant="outline" className="capitalize">{recipe.meal_type}</Badge>
+              <Badge className="capitalize bg-white/20 text-white border-white/30 backdrop-blur-sm">{recipe.meal_type}</Badge>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Nutrition Info */}
-          {(recipe.calories || recipe.protein || recipe.carbs || recipe.fat) && (
-            <div className="bg-secondary/50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3">Nutrition Information</h3>
+      {/* Content Grid */}
+      <div className="grid gap-6">
+        {/* Nutrition Info */}
+        {(recipe.calories || recipe.protein || recipe.carbs || recipe.fat) && (
+          <Card className="shadow-card">
+            <CardContent className="p-5">
+              <h3 className="text-lg font-display font-semibold mb-4">Nutrition per Serving</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {recipe.calories && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-500/10">
                     <Flame className="h-5 w-5 text-orange-500" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Calories</p>
+                      <p className="text-xs text-muted-foreground">Calories</p>
                       <p className="font-semibold">{recipe.calories} kcal</p>
                     </div>
                   </div>
                 )}
                 {recipe.protein && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-red-500/10">
                     <Beef className="h-5 w-5 text-red-500" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Protein</p>
+                      <p className="text-xs text-muted-foreground">Protein</p>
                       <p className="font-semibold">{recipe.protein}g</p>
                     </div>
                   </div>
                 )}
                 {recipe.carbs && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10">
                     <Wheat className="h-5 w-5 text-amber-500" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Carbs</p>
+                      <p className="text-xs text-muted-foreground">Carbs</p>
                       <p className="font-semibold">{recipe.carbs}g</p>
                     </div>
                   </div>
                 )}
                 {recipe.fat && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-yellow-500/10">
                     <Droplet className="h-5 w-5 text-yellow-500" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Fat</p>
+                      <p className="text-xs text-muted-foreground">Fat</p>
                       <p className="font-semibold">{recipe.fat}g</p>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
+        )}
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold">Ingredients</h2>
-              <Button variant="outline" size="sm" onClick={handleDownloadIngredients}>
-                <Download className="h-4 w-4 mr-2" />
-                Download List
+        {/* Ingredients */}
+        <Card className="shadow-card">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-display font-semibold">Ingredients</h2>
+              <Button variant="outline" size="sm" onClick={handleDownloadIngredients} className="gap-2">
+                <Download className="h-4 w-4" />
+                Download
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
               {recipe.ingredients.map((ing: string, idx: number) => (
-                <Badge key={idx} variant="secondary">{ing}</Badge>
+                <Badge key={idx} variant="secondary" className="px-3 py-1.5 text-sm">{ing}</Badge>
               ))}
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* How to Make Steps */}
-          {recipe.steps && recipe.steps.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
+        {/* Steps */}
+        {recipe.steps && recipe.steps.length > 0 && (
+          <Card className="shadow-card">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-5">
                 <ChefHat className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-semibold">How to Make</h2>
+                <h2 className="text-lg font-display font-semibold">How to Make</h2>
               </div>
               <div className="space-y-4">
                 {recipe.steps.map((step: string, idx: number) => (
@@ -296,25 +398,28 @@ export default function RecipeDetail() {
                       {idx + 1}
                     </div>
                     <div className="flex-1 pt-1">
-                      <p className="text-foreground">{step}</p>
+                      <p className="text-foreground leading-relaxed">{step}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
+        )}
 
-          {user && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Rate this recipe</h3>
+        {/* Rating */}
+        <Card className="shadow-card">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-display font-semibold mb-3">Rate this Recipe</h3>
+            <div className="flex items-center gap-3">
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <Star
                     key={rating}
-                    className={`h-6 w-6 cursor-pointer transition-smooth ${
+                    className={`h-7 w-7 cursor-pointer transition-all duration-200 hover:scale-110 ${
                       (hoverRating || userRating) >= rating
                         ? 'fill-accent text-accent'
-                        : 'text-muted-foreground'
+                        : 'text-muted-foreground/40'
                     }`}
                     onMouseEnter={() => setHoverRating(rating)}
                     onMouseLeave={() => setHoverRating(0)}
@@ -322,65 +427,88 @@ export default function RecipeDetail() {
                   />
                 ))}
               </div>
+              {userRating > 0 && (
+                <span className="text-sm text-muted-foreground">You rated {userRating}/5</span>
+              )}
+              {!user && (
+                <span className="text-sm text-muted-foreground">Sign in to rate</span>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card className="shadow-card">
-        <CardContent className="p-6 space-y-4">
-          <h2 className="text-2xl font-display font-bold">Comments</h2>
-          
-          {user && (
-            <div className="flex gap-2">
+        {/* Comments */}
+        <Card className="shadow-card">
+          <CardContent className="p-5 space-y-5">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-display font-semibold">Comments</h2>
+              <Badge variant="secondary" className="ml-1">{comments.length}</Badge>
+            </div>
+
+            {/* Comment input — always visible */}
+            <div className="flex gap-3">
               <Textarea
-                placeholder="Add a comment..."
+                placeholder={user ? "Share your thoughts about this recipe..." : "Sign in to leave a comment..."}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                className="min-h-[80px] resize-none"
+                disabled={!user}
               />
-              <Button onClick={handleComment}>Post</Button>
+              <Button
+                onClick={handleComment}
+                disabled={commentLoading || !newComment.trim()}
+                size="icon"
+                className="h-10 w-10 self-end shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
             </div>
-          )}
 
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="border-l-2 border-primary pl-4 group">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">{comment.profiles?.name}</p>
-                  {user && (user.id === comment.user_id || isAdmin) && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-smooth"
-                      onClick={async () => {
-                        const { error } = await supabase
-                          .from('comments')
-                          .delete()
-                          .eq('id', comment.id);
-                        if (!error) {
-                          toast.success('Comment deleted');
-                          fetchComments();
-                        } else {
-                          toast.error('Failed to delete comment');
-                        }
-                      }}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3 group">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-semibold text-sm">{comment.profiles?.name || 'Anonymous'}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(comment.created_at).toLocaleDateString()}
+                        </p>
+                        {user && (user.id === comment.user_id || isAdmin) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-all text-muted-foreground hover:text-destructive"
+                            onClick={async () => {
+                              const { error } = await supabase.from('comments').delete().eq('id', comment.id);
+                              if (!error) {
+                                toast.success('Comment deleted');
+                                fetchComments();
+                              } else {
+                                toast.error('Failed to delete comment');
+                              }
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{comment.text}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{comment.text}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-            {comments.length === 0 && (
-              <p className="text-sm text-muted-foreground">No comments yet. Be the first!</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No comments yet. Be the first to share your thoughts!</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

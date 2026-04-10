@@ -15,7 +15,7 @@ interface RecipeCardProps {
     ingredients: string[];
     preparation_time: number;
     image_url: string | null;
-    average_rating: number;
+    average_rating: number | null;
     profiles?: {
       name: string;
     };

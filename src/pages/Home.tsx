@@ -22,7 +22,7 @@ interface Recipe {
   ingredients: string[];
   preparation_time: number;
   image_url: string | null;
-  average_rating: number;
+  average_rating: number | null;
   author_id: string;
   meal_type: string | null;
   profiles: {

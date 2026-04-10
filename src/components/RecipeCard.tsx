@@ -15,7 +15,7 @@ interface RecipeCardProps {
     ingredients: string[];
     preparation_time: number;
     image_url: string | null;
-    average_rating: number;
+    average_rating: number | null;
     profiles?: {
       name: string;
     };
@@ -43,7 +43,10 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
 
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) return;
+    if (!user) {
+      toast.error('Please sign in to save favorites');
+      return;
+    }
     if (isFavorite) {
       const { error } = await supabase.from('favorites').delete().eq('recipe_id', recipe.id).eq('user_id', user.id);
       if (error) { toast.error('Failed to update favorites'); return; }
@@ -106,7 +109,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
           <div className="flex items-center gap-1">
             <Star className="h-3.5 w-3.5 fill-accent text-accent" />
-            <span className="font-medium">{recipe.average_rating.toFixed(1)}</span>
+            <span className="font-medium">{(recipe.average_rating ?? 0).toFixed(1)}</span>
           </div>
           <span className="text-border">·</span>
           <div className="flex items-center gap-1">

@@ -36,41 +36,23 @@
         opacity: 0;
         visibility: hidden;
       }
+      .preloader-icon {
+        opacity: 0;
+        animation: preloaderFadeIn 0.6s ease forwards 0.1s, preloaderPulse 1.8s ease-in-out infinite 0.7s;
+      }
       .preloader-logo {
         font-family: 'Playfair Display', serif;
         font-size: 2.5rem;
         font-weight: 700;
         color: #fff;
         letter-spacing: -0.02em;
-        margin-bottom: 2rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
         opacity: 0;
-        animation: preloaderFadeIn 0.8s ease forwards 0.2s;
+        animation: preloaderFadeIn 0.8s ease forwards 0.3s;
       }
       .preloader-logo span {
         color: #e8632b;
-      }
-      .preloader-spinner {
-        width: 48px;
-        height: 48px;
-        position: relative;
-        opacity: 0;
-        animation: preloaderFadeIn 0.6s ease forwards 0.5s;
-      }
-      .preloader-spinner::before,
-      .preloader-spinner::after {
-        content: '';
-        position: absolute;
-        border-radius: 50%;
-      }
-      .preloader-spinner::before {
-        inset: 0;
-        border: 3px solid rgba(232, 99, 43, 0.15);
-      }
-      .preloader-spinner::after {
-        inset: 0;
-        border: 3px solid transparent;
-        border-top-color: #e8632b;
-        animation: preloaderSpin 0.8s linear infinite;
       }
       .preloader-tagline {
         font-family: 'DM Sans', sans-serif;
@@ -93,8 +75,16 @@
 
   <body>
     <div id="preloader">
+      <div class="preloader-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#e8632b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="64" height="64">
+          <path d="M17 21.5H7c-.4 0-.7-.2-.9-.5-.2-.3-.2-.7 0-1l1.5-3.5h8.8l1.5 3.5c.2.3.1.7 0 1-.2.3-.5.5-.9.5z"/>
+          <path d="M12 2.5c-5.2 0-8 3.7-8 7.5 0 2.8 1.5 5 3.5 6h9c2-1 3.5-3.2 3.5-6 0-3.8-2.8-7.5-8-7.5z"/>
+          <path d="M12 2.5V1"/>
+          <path d="M4.2 5.5l-1-1"/>
+          <path d="M19.8 5.5l1-1"/>
+        </svg>
+      </div>
       <div class="preloader-logo">Recipe <span>Rebel</span></div>
-      <div class="preloader-spinner"></div>
       <div class="preloader-tagline">Crafting Flavors</div>
     </div>
     <div id="root"></div>

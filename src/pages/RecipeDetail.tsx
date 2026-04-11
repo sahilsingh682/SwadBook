@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X, ArrowLeft, Heart, MessageCircle, Send, Link2, Twitter } from 'lucide-react';
 import { toast } from 'sonner';
 import { commentSchema } from '@/lib/validations';
+import SharePreviewModal from '@/components/SharePreviewModal';
+import { Share2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +35,7 @@ export default function RecipeDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -369,7 +372,18 @@ export default function RecipeDetail() {
           <Link2 className="h-4 w-4" />
           Copy Link
         </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setShareModalOpen(true)}
+          className="gap-2 ml-auto"
+        >
+          <Share2 className="h-4 w-4" />
+          Preview & Share
+        </Button>
       </div>
+
+      <SharePreviewModal open={shareModalOpen} onOpenChange={setShareModalOpen} recipe={recipe} />
 
       {/* Content Grid */}
       <div className="grid gap-6">

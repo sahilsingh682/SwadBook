@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X, ArrowLeft, Heart, MessageCircle, Send } from 'lucide-react';
+import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X, ArrowLeft, Heart, MessageCircle, Send, Link2, Twitter } from 'lucide-react';
 import { toast } from 'sonner';
 import { commentSchema } from '@/lib/validations';
 import {

@@ -35,6 +35,7 @@ export default function RecipeDetail() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -371,7 +372,18 @@ export default function RecipeDetail() {
           <Link2 className="h-4 w-4" />
           Copy Link
         </Button>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={() => setShareModalOpen(true)}
+          className="gap-2 ml-auto"
+        >
+          <Share2 className="h-4 w-4" />
+          Preview & Share
+        </Button>
       </div>
+
+      <SharePreviewModal open={shareModalOpen} onOpenChange={setShareModalOpen} recipe={recipe} />
 
       {/* Content Grid */}
       <div className="grid gap-6">

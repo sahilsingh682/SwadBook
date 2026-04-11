@@ -205,6 +205,27 @@ export default function RecipeDetail() {
     }
   };
 
+  const handleShareWhatsApp = () => {
+    const url = window.location.href;
+    const text = `Check out this recipe: ${recipe?.title}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
+  };
+
+  const handleShareTwitter = () => {
+    const url = window.location.href;
+    const text = `Check out this recipe: ${recipe?.title}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    } catch {
+      toast.error('Failed to copy link');
+    }
+  };
+
   const canEditDelete = user && (user.id === recipe?.author_id || isAdmin);
 
   if (!recipe) {

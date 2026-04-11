@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Clock, User, Download, Pencil, Trash2, Flame, Beef, Wheat, Droplet, ChefHat, X, ArrowLeft, Heart, MessageCircle, Send, Link2, Twitter } from 'lucide-react';
 import { toast } from 'sonner';
 import { commentSchema } from '@/lib/validations';
+import SharePreviewModal from '@/components/SharePreviewModal';
+import { Share2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,

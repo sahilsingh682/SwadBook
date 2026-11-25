@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Save, Plus, X } from 'lucide-react';
+import { Upload, Plus, X, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { recipeSchema } from '@/lib/validations';
 import {
@@ -18,88 +18,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function EditRecipe() {
-  const { id } = useParams();
-  const { user } = useAuth();
+export default function UploadRecipe() {
+  const { user, isSuspended, suspensionReason } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
   const [title, setTitle] = useState('');
   const [ingredients, setIngredients] = useState<string[]>(['']);
   const [steps, setSteps] = useState<string[]>(['']);
   const [preparationTime, setPreparationTime] = useState('');
   const [mealType, setMealType] = useState<string>('');
+  const [dietaryType, setDietaryType] = useState<string>('vegetarian');
+  const [state, setState] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (id && user) {
-      loadData();
-    }
-  }, [id, user]);
-
-  const loadData = async () => {
-    if (!user) return;
-    // Check admin role FIRST before fetching recipe (which depends on it)
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
-    const adminStatus = !!roleData;
-    setIsAdmin(adminStatus);
-    await fetchRecipeWithAdmin(adminStatus);
-  };
-
-  const fetchRecipeWithAdmin = async (adminStatus: boolean) => {
-    try {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      if (!data) {
-        toast.error('Recipe not found');
-        navigate('/');
-        return;
-      }
-
-      // Check permission using passed-in admin status (not stale state)
-      if (data.author_id !== user?.id && !adminStatus) {
-        toast.error('You do not have permission to edit this recipe');
-        navigate('/');
-        return;
-      }
-
-      setTitle(data.title);
-      setIngredients(data.ingredients || ['']);
-      setSteps(data.steps && data.steps.length > 0 ? data.steps : ['']);
-      setPreparationTime(data.preparation_time?.toString() || '');
-      setMealType(data.meal_type || '');
-      setCalories(data.calories?.toString() || '');
-      setProtein(data.protein?.toString() || '');
-      setCarbs(data.carbs?.toString() || '');
-      setFat(data.fat?.toString() || '');
-      setExistingImageUrl(data.image_url);
-      if (data.image_url) {
-        setImagePreview(data.image_url);
-      }
-    } catch (error) {
-      console.error('Error fetching recipe:', error);
-      toast.error('Failed to load recipe');
-    } finally {
-      setIsFetching(false);
-    }
-  };
 
   const addIngredient = () => {
     setIngredients([...ingredients, '']);
@@ -143,8 +79,9 @@ export default function EditRecipe() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !id) return;
+    if (!user) return;
 
+    // Validate form data
     const filteredIngredients = ingredients.filter(ing => ing.trim() !== '');
     const filteredSteps = steps.filter(step => step.trim() !== '');
     const validationResult = recipeSchema.safeParse({
@@ -153,6 +90,9 @@ export default function EditRecipe() {
       steps: filteredSteps,
       preparationTime: parseInt(preparationTime) || 0,
       mealType: mealType || undefined,
+      dietaryType: (dietaryType as 'vegetarian' | 'non-vegetarian') || 'vegetarian',
+      state: state || undefined,
+      tags: selectedTags,
       calories: calories ? parseInt(calories) : undefined,
       protein: protein ? parseFloat(protein) : undefined,
       carbs: carbs ? parseFloat(carbs) : undefined,
@@ -168,8 +108,9 @@ export default function EditRecipe() {
     setIsLoading(true);
 
     try {
-      let imageUrl = existingImageUrl;
+      let imageUrl = null;
 
+      // Upload image if provided
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
@@ -187,29 +128,34 @@ export default function EditRecipe() {
         imageUrl = publicUrl;
       }
 
-      const { error: updateError } = await supabase
+      // Create recipe
+      const { error: insertError } = await supabase
         .from('recipes')
-        .update({
+        .insert({
           title: validationResult.data.title,
           ingredients: validationResult.data.ingredients,
           steps: validationResult.data.steps,
           preparation_time: validationResult.data.preparationTime,
           meal_type: validationResult.data.mealType || null,
+          dietary_type: validationResult.data.dietaryType || 'vegetarian',
+          state: validationResult.data.state || null,
+          tags: validationResult.data.tags || [],
           calories: validationResult.data.calories || null,
           protein: validationResult.data.protein || null,
           carbs: validationResult.data.carbs || null,
           fat: validationResult.data.fat || null,
           image_url: imageUrl,
-        })
-        .eq('id', id);
+          author_id: user.id,
+          status: 'pending'
+        });
 
-      if (updateError) throw updateError;
+      if (insertError) throw insertError;
 
-      toast.success('Recipe updated successfully!');
-      navigate(`/recipe/${id}`);
+      toast.success('Recipe uploaded successfully! It will be reviewed by our team.');
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Error updating recipe:', error);
-      toast.error('Failed to update recipe');
+      console.error('Error uploading recipe:', error);
+      toast.error('Failed to upload recipe');
     } finally {
       setIsLoading(false);
     }
@@ -220,21 +166,33 @@ export default function EditRecipe() {
     return null;
   }
 
-  if (isFetching) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  if (isSuspended) {
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-md text-center">
+        <Card className="p-8 shadow-card border">
+          <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-display font-bold mb-2">Account On Hold</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Your account is currently placed on hold ({suspensionReason || 'community policy violation'}). Recipe creation is temporarily disabled.
+          </p>
+          <Button onClick={() => navigate('/')}>Return to Home</Button>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="text-3xl font-display">Edit Recipe</CardTitle>
+          <CardTitle className="text-3xl font-display">Upload Your Recipe</CardTitle>
           <CardDescription>
-            Update your recipe details below.
+            Share your culinary creation with the community. Your recipe will be reviewed before being published.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Recipe Title</Label>
               <Input
@@ -246,6 +204,33 @@ export default function EditRecipe() {
               />
             </div>
 
+            {/* Dietary Type & State Cuisine */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Dietary Preference</Label>
+                <Select value={dietaryType} onValueChange={setDietaryType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Dietary Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vegetarian">🟢 Vegetarian</SelectItem>
+                    <SelectItem value="non-vegetarian">🔴 Non-Vegetarian</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="state">State / Region (Optional)</Label>
+                <Input
+                  id="state"
+                  placeholder="e.g. Punjab, Maharashtra, Tamil Nadu..."
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Meal Type */}
             <div className="space-y-2">
               <Label>Meal Type (Optional)</Label>
               <Select value={mealType} onValueChange={setMealType}>
@@ -255,11 +240,48 @@ export default function EditRecipe() {
                 <SelectContent>
                   <SelectItem value="breakfast">Breakfast</SelectItem>
                   <SelectItem value="lunch">Lunch</SelectItem>
+                  <SelectItem value="snacks">Snacks & Street Food</SelectItem>
                   <SelectItem value="dinner">Dinner</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
+            {/* Health & Fitness Tags */}
+            <div className="space-y-2">
+              <Label>Fitness & Diet Tags (Optional)</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: 'high-protein', label: 'High Protein' },
+                  { id: 'gym-diet', label: 'Gym Diet' },
+                  { id: 'high-fiber', label: 'High Fiber' },
+                  { id: 'high-carbs', label: 'High Carbs' },
+                ].map((tag) => {
+                  const isSelected = selectedTags.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedTags(selectedTags.filter((t) => t !== tag.id));
+                        } else {
+                          setSelectedTags([...selectedTags, tag.id]);
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-smooth border ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-muted/50 text-muted-foreground border-border hover:text-foreground'
+                      }`}
+                    >
+                      {isSelected ? '✓ ' : '+ '}{tag.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Ingredients */}
             <div className="space-y-2">
               <Label>Ingredients</Label>
               {ingredients.map((ingredient, index) => (
@@ -333,6 +355,7 @@ export default function EditRecipe() {
               </Button>
             </div>
 
+            {/* Preparation Time */}
             <div className="space-y-2">
               <Label htmlFor="prep-time">Preparation Time (minutes)</Label>
               <Input
@@ -346,6 +369,7 @@ export default function EditRecipe() {
               />
             </div>
 
+            {/* Nutrition Info */}
             <div className="space-y-2">
               <Label>Nutrition Information (Optional)</Label>
               <div className="grid grid-cols-2 gap-4">
@@ -399,6 +423,7 @@ export default function EditRecipe() {
               </div>
             </div>
 
+            {/* Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image">Recipe Image</Label>
               {imagePreview && (
@@ -418,10 +443,10 @@ export default function EditRecipe() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Saving...' : (
+              {isLoading ? 'Uploading...' : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Recipe
                 </>
               )}
             </Button>

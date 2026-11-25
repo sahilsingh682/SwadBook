@@ -1,0 +1,4 @@
+project_id = "rxtzrpvaaumxwtulkmgy"
+
+[functions.ai-dietician]
+verify_jwt = false

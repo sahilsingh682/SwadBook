@@ -1,3 +1,21 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Build and Dependencies
+node_modules/
+dist/
+dist-ssr/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+supabase/.temp/
+backend/supabase/.temp/
+
 # Logs
 logs
 *.log

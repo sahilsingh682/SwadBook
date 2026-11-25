@@ -8,10 +8,13 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isSuspended: boolean;
+  suspensionReason: string | null;
   loading: boolean;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,33 +23,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [suspensionReason, setSuspensionReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      const [roleRes, profileRes] = await Promise.all([
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('status, suspension_reason')
+          .eq('id', userId)
+          .maybeSingle(),
+      ]);
+
+      setIsAdmin(!!roleRes.data);
+      if (profileRes.data && profileRes.data.status === 'suspended') {
+        setIsSuspended(true);
+        setSuspensionReason(profileRes.data.suspension_reason || 'Platform policy violation');
+      } else {
+        setIsSuspended(false);
+        setSuspensionReason(null);
+      }
+    } catch (error) {
+      console.error('Error checking user status:', error);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchUserData(user.id);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
         if (session?.user) {
-          // Check if user is admin - deferred to avoid deadlock
-          setTimeout(async () => {
-            try {
-              const { data: roles } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .eq('role', 'admin')
-                .maybeSingle();
-              
-              setIsAdmin(!!roles);
-            } catch (error) {
-              console.error('Error checking admin status:', error);
-            }
+          setTimeout(() => {
+            fetchUserData(session.user.id);
           }, 0);
 
           // Clear hash fragment after successful OAuth login
@@ -55,15 +82,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } else {
           setIsAdmin(false);
+          setIsSuspended(false);
+          setSuspensionReason(null);
         }
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
       setLoading(false);
     });
 
@@ -135,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isSuspended, suspensionReason, loading, signUp, signIn, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

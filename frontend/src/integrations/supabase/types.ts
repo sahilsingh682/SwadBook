@@ -94,18 +94,24 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          status: string
+          suspension_reason: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id: string
           name: string
+          status?: string
+          suspension_reason?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          status?: string
+          suspension_reason?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -156,6 +162,8 @@ export type Database = {
           calories: number | null
           carbs: number | null
           created_at: string
+          description: string | null
+          dietary_type: string | null
           fat: number | null
           id: string
           image_url: string | null
@@ -163,8 +171,10 @@ export type Database = {
           meal_type: string | null
           preparation_time: number
           protein: number | null
+          state: string | null
           status: Database["public"]["Enums"]["recipe_status"]
           steps: string[] | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
@@ -174,6 +184,8 @@ export type Database = {
           calories?: number | null
           carbs?: number | null
           created_at?: string
+          description?: string | null
+          dietary_type?: string | null
           fat?: number | null
           id?: string
           image_url?: string | null
@@ -181,8 +193,10 @@ export type Database = {
           meal_type?: string | null
           preparation_time: number
           protein?: number | null
+          state?: string | null
           status?: Database["public"]["Enums"]["recipe_status"]
           steps?: string[] | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -192,6 +206,8 @@ export type Database = {
           calories?: number | null
           carbs?: number | null
           created_at?: string
+          description?: string | null
+          dietary_type?: string | null
           fat?: number | null
           id?: string
           image_url?: string | null
@@ -199,8 +215,10 @@ export type Database = {
           meal_type?: string | null
           preparation_time?: number
           protein?: number | null
+          state?: string | null
           status?: Database["public"]["Enums"]["recipe_status"]
           steps?: string[] | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }

@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { commentSchema } from '@/lib/validations';
 import SharePreviewModal from '@/components/SharePreviewModal';
 import { Share2 } from 'lucide-react';
+import { AuthPromptDialog, AuthPromptAction } from '@/components/AuthPromptDialog';
+import { FAMOUS_RECIPES } from '@/data/famousRecipes';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +28,7 @@ import {
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isSuspended } = useAuth();
   const [recipe, setRecipe] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -36,6 +38,10 @@ export default function RecipeDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [commentLoading, setCommentLoading] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+
+  // Auth Dialog prompt for guests
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<AuthPromptAction>('general');
 
   useEffect(() => {
     if (id) {
@@ -73,8 +79,12 @@ export default function RecipeDetail() {
 
   const toggleFavorite = async () => {
     if (!user) {
-      toast.error('Please sign in to save favorites');
-      navigate('/auth');
+      setAuthAction('favorite');
+      setAuthDialogOpen(true);
+      return;
+    }
+    if (isSuspended) {
+      toast.error('Your account is on hold. Favoriting recipes is currently disabled.');
       return;
     }
     if (isFavorite) {
@@ -91,12 +101,23 @@ export default function RecipeDetail() {
   };
 
   const fetchRecipe = async () => {
-    const { data } = await supabase
-      .from('recipes')
-      .select('*, profiles:author_id(name)')
-      .eq('id', id)
-      .single();
-    setRecipe(data);
+    try {
+      const { data } = await supabase
+        .from('recipes')
+        .select('*, profiles:author_id(name)')
+        .eq('id', id)
+        .maybeSingle();
+      if (data) {
+        setRecipe(data);
+        return;
+      }
+    } catch {
+      // continue to fallback
+    }
+    const fallback = FAMOUS_RECIPES.find((r) => r.id === id);
+    if (fallback) {
+      setRecipe(fallback);
+    }
   };
 
   const fetchComments = async () => {
@@ -120,8 +141,12 @@ export default function RecipeDetail() {
 
   const handleRate = async (rating: number) => {
     if (!user) {
-      toast.error('Please sign in to rate recipes');
-      navigate('/auth');
+      setAuthAction('rate');
+      setAuthDialogOpen(true);
+      return;
+    }
+    if (isSuspended) {
+      toast.error('Your account is on hold. Rating recipes is currently disabled.');
       return;
     }
 
@@ -156,8 +181,12 @@ export default function RecipeDetail() {
 
   const handleComment = async () => {
     if (!user) {
-      toast.error('Please sign in to comment');
-      navigate('/auth');
+      setAuthAction('comment');
+      setAuthDialogOpen(true);
+      return;
+    }
+    if (isSuspended) {
+      toast.error('Your account is on hold. Posting comments is currently disabled.');
       return;
     }
 
@@ -255,6 +284,56 @@ export default function RecipeDetail() {
         Back
       </Button>
 
+      {/* Admin Moderation Banner */}
+      {isAdmin && recipe?.status === 'pending' && (
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/15 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-amber-500 text-white font-medium text-xs">
+                Pending Admin Verification
+              </Badge>
+              <span className="text-xs text-muted-foreground font-mono">ID: {recipe.id}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              This recipe is not yet listed on the public platform. Verify the recipe content and approve to publish.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              size="sm"
+              onClick={async () => {
+                const { error } = await supabase.from('recipes').update({ status: 'approved' }).eq('id', id);
+                if (!error) {
+                  toast.success('Recipe approved & listed publicly!');
+                  fetchRecipe();
+                } else {
+                  toast.error('Failed to approve recipe');
+                }
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white h-9 px-4 font-medium"
+            >
+              Approve & Publish
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={async () => {
+                const { error } = await supabase.from('recipes').update({ status: 'rejected' }).eq('id', id);
+                if (!error) {
+                  toast.success('Recipe rejected');
+                  fetchRecipe();
+                } else {
+                  toast.error('Failed to reject recipe');
+                }
+              }}
+              className="h-9 px-4 font-medium"
+            >
+              Reject
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Image */}
       <div className="relative rounded-2xl overflow-hidden mb-6 shadow-card">
         <div className="aspect-video w-full">
@@ -317,6 +396,36 @@ export default function RecipeDetail() {
 
         {/* Title overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-6">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            {recipe.state && (
+              <span className="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-xs font-bold text-white border border-white/20">
+                📍 {recipe.state}
+              </span>
+            )}
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold backdrop-blur-md border ${
+                recipe.dietary_type === 'non-vegetarian'
+                  ? 'bg-red-950/70 text-red-200 border-red-500/50'
+                  : 'bg-emerald-950/70 text-emerald-200 border-emerald-500/50'
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  recipe.dietary_type === 'non-vegetarian' ? 'bg-red-400' : 'bg-emerald-400'
+                }`}
+              />
+              <span>{recipe.dietary_type === 'non-vegetarian' ? 'Non-Vegetarian' : 'Vegetarian'}</span>
+            </span>
+            {recipe.tags && recipe.tags.map((tag: string, idx: number) => (
+              <span
+                key={idx}
+                className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-medium border border-white/20 capitalize"
+              >
+                {tag.replace('-', ' ')}
+              </span>
+            ))}
+          </div>
+
           <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">{recipe.title}</h1>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-white/90 text-sm">
@@ -578,6 +687,12 @@ export default function RecipeDetail() {
           </CardContent>
         </Card>
       </div>
+      {/* Auth Prompt Dialog for Unauthenticated Users */}
+      <AuthPromptDialog
+        open={authDialogOpen}
+        onOpenChange={setAuthDialogOpen}
+        action={authAction}
+      />
     </div>
   );
 }

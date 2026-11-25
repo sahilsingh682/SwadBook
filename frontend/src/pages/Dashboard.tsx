@@ -80,17 +80,28 @@ export default function Dashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
-      approved: 'default',
-      pending: 'secondary',
-      rejected: 'destructive',
-    };
-
-    return (
-      <Badge variant={variants[status] || 'secondary'} className="capitalize">
-        {status}
-      </Badge>
-    );
+    if (status === 'approved') {
+      return (
+        <Badge className="bg-emerald-500/90 text-white font-medium shadow-sm">
+          Approved & Live
+        </Badge>
+      );
+    }
+    if (status === 'pending') {
+      return (
+        <Badge className="bg-amber-500/90 text-white font-medium shadow-sm">
+          Under Admin Review
+        </Badge>
+      );
+    }
+    if (status === 'rejected') {
+      return (
+        <Badge variant="destructive" className="font-medium shadow-sm">
+          Rejected
+        </Badge>
+      );
+    }
+    return <Badge variant="secondary">{status}</Badge>;
   };
 
   if (!user) return null;

@@ -21,7 +21,10 @@ export const recipeSchema = z.object({
   preparationTime: z.number()
     .min(1, 'Preparation time must be at least 1 minute')
     .max(1440, 'Preparation time must be less than 24 hours'),
-  mealType: z.enum(['breakfast', 'lunch', 'dinner']).optional(),
+  mealType: z.enum(['breakfast', 'lunch', 'dinner', 'snacks']).optional(),
+  dietaryType: z.enum(['vegetarian', 'non-vegetarian']).optional(),
+  state: z.string().max(100).optional(),
+  tags: z.array(z.string()).optional(),
   calories: z.number().min(0).max(10000).optional(),
   protein: z.number().min(0).max(1000).optional(),
   carbs: z.number().min(0).max(1000).optional(),

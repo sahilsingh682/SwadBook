@@ -657,59 +657,133 @@ export default function Home() {
       {/* ======================================================== */}
       {/* 3. PRODUCT & PLATFORM HIGHLIGHTS */}
       {/* ======================================================== */}
-      <section className="py-16 bg-card/50 border-t border-b">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-2xl mx-auto mb-14 space-y-2">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase">
-              Trust & Transparency
-            </span>
-            <h2 className="text-3xl font-display font-bold">
-              Why Food Lovers Choose SwadBook
+      <section className="relative overflow-hidden py-20 bg-gradient-to-b from-background via-card/70 to-background border-t border-b">
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 20% 20%, hsl(24 95% 53% / 0.18), transparent 45%), radial-gradient(circle at 80% 80%, hsl(38 92% 50% / 0.15), transparent 45%)',
+          }}
+        />
+
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
+          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wider uppercase">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Trust &amp; Transparency</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight">
+              Why Food Lovers Choose <span className="text-primary">SwadBook</span>
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Every dish is authenticated, tagged with nutritional macros, and paired with smart AI culinary assistance.
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Every dish is authenticated, balanced with exact nutritional macros, and paired with RAG-powered AI culinary guidance.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="p-6 rounded-2xl bg-card border shadow-card space-y-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
-                📍
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="group relative overflow-hidden p-6 rounded-2xl bg-card border border-border/80 shadow-card hover:shadow-warm hover:-translate-y-1 hover:border-primary/40 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-500/15 to-amber-500/15 text-primary border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <MapPin className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                  10+ States
+                </span>
               </div>
-              <h3 className="font-display font-bold text-base">Regional Authenticity</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                From Amritsari kulchas to Chettinad pepper chicken, explore true state recipes with zero dilution.
-              </p>
+              <div className="space-y-1.5">
+                <h3 className="font-display font-bold text-lg">Regional Authenticity</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  From Amritsari kulchas to Chettinad pepper chicken, explore beginner-friendly state recipes with zero dilution.
+                </p>
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border shadow-card space-y-3">
-              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xl">
-                💪
+            <div className="group relative overflow-hidden p-6 rounded-2xl bg-card border border-border/80 shadow-card hover:shadow-warm hover:-translate-y-1 hover:border-emerald-500/40 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 text-emerald-600 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Dumbbell className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700">
+                  Macro Verified
+                </span>
               </div>
-              <h3 className="font-display font-bold text-base">Gym & Fitness Focused</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Filter by high-protein or gym diet options with exact protein and carb counts for clean muscle building.
-              </p>
+              <div className="space-y-1.5">
+                <h3 className="font-display font-bold text-lg">Gym &amp; Fitness Focused</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Filter by high-protein, high-fiber, or gym diet options with exact protein, carb, and calorie counts.
+                </p>
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border shadow-card space-y-3">
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-xl">
-                🛡️
+            <div className="group relative overflow-hidden p-6 rounded-2xl bg-card border border-border/80 shadow-card hover:shadow-warm hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-yellow-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-500/15 to-yellow-500/15 text-amber-600 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700">
+                  Zero Spam
+                </span>
               </div>
-              <h3 className="font-display font-bold text-base">100% Admin Verified</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Every community submission passes through our admin moderation queue before getting listed on the feed.
-              </p>
+              <div className="space-y-1.5">
+                <h3 className="font-display font-bold text-lg">100% Admin Verified</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Every community submission passes through our admin moderation queue before getting listed on the feed.
+                </p>
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border shadow-card space-y-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
-                🤖
+            <div className="group relative overflow-hidden p-6 rounded-2xl bg-card border border-border/80 shadow-card hover:shadow-warm hover:-translate-y-1 hover:border-primary/40 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="flex items-center justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-rose-500/15 to-orange-500/15 text-primary border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                  RAG · 24/7
+                </span>
               </div>
-              <h3 className="font-display font-bold text-base">Gemini AI Dietician</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Instant nutritional guidance, personalized diet plans, and ingredient swaps 24/7.
+              <div className="space-y-1.5">
+                <h3 className="font-display font-bold text-lg">Gemini AI Dietician</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Instant recipe lookups, personalized diet plans, and macro advice grounded in SwadBook&apos;s live catalog.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Community CTA Banner */}
+          <div className="mt-12 rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/5 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+            <div className="space-y-1.5 text-center md:text-left">
+              <h3 className="font-display font-bold text-xl sm:text-2xl">
+                Got a signature dish your family loves?
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-xl">
+                Publish your recipe on SwadBook, earn community ratings, and inspire home cooks across India.
               </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+              <Button
+                size="lg"
+                onClick={handleUploadClick}
+                className="shadow-warm rounded-xl gap-2 font-semibold"
+              >
+                <Plus className="h-4 w-4" />
+                Share Your Recipe
+              </Button>
+              {!user && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate('/auth')}
+                  className="rounded-xl gap-2 bg-card hover:bg-muted/80 font-semibold"
+                >
+                  Join SwadBook Free
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

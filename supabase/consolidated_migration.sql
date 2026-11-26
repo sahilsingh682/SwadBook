@@ -39,7 +39,11 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 CREATE TABLE IF NOT EXISTS public.user_roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  short_id SERIAL,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  short_user_id TEXT GENERATED ALWAYS AS ('USR-' || UPPER(LEFT(user_id::text, 8))) STORED,
+  user_name TEXT,
+  user_email TEXT,
   role public.app_role NOT NULL DEFAULT 'user',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(user_id, role)
@@ -124,17 +128,25 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  display_name TEXT;
 BEGIN
+  display_name := COALESCE(
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'full_name',
+    split_part(NEW.email, '@', 1),
+    NEW.email
+  );
+
   INSERT INTO public.profiles (id, name)
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'name', NEW.email)
-  )
+  VALUES (NEW.id, display_name)
   ON CONFLICT (id) DO NOTHING;
   
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (NEW.id, 'user')
-  ON CONFLICT (user_id, role) DO NOTHING;
+  INSERT INTO public.user_roles (user_id, role, user_name, user_email)
+  VALUES (NEW.id, 'user', display_name, NEW.email)
+  ON CONFLICT (user_id, role) DO UPDATE
+    SET user_name = EXCLUDED.user_name,
+        user_email = EXCLUDED.user_email;
   
   RETURN NEW;
 END;

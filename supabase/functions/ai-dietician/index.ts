@@ -152,10 +152,10 @@ STRICT GUIDELINES:
         `Aim for 25-30g of dietary fiber daily for optimal gut health and steady energy!`;
     } else {
       fallbackReply += `I'm here to help you personalize your meals and hit your fitness goals! You can ask me:\n` +
-        `• *"Suggest a high-protein vegetarian gym diet"*\n` +
-        `• *"What are healthy breakfast ideas under 400 calories?"*\n` +
-        `• *"How much protein is in Paneer Tikka vs Chicken Tikka?"*\n` +
-        `• *"Give me a 1500 calorie Indian meal plan"*`;
+        `• "Suggest a high-protein vegetarian gym diet"\n` +
+        `• "What are healthy breakfast ideas under 400 calories?"\n` +
+        `• "How much protein is in Paneer Tikka vs Chicken Tikka?"\n` +
+        `• "Give me a 1500 calorie Indian meal plan"`;
     }
 
     return new Response(

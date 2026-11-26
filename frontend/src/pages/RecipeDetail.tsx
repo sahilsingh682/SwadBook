@@ -25,6 +25,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+const isUuid = (val?: string) =>
+  !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,7 +70,16 @@ export default function RecipeDetail() {
   };
 
   const checkFavorite = async () => {
-    if (!user) return;
+    if (!user || !id) return;
+    if (!isUuid(id)) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`recipe_rebel_favs_${user.id}`) || '[]');
+        setIsFavorite(Array.isArray(stored) && stored.includes(id));
+      } catch {
+        setIsFavorite(false);
+      }
+      return;
+    }
     const { data } = await supabase
       .from('favorites')
       .select('id')
@@ -85,6 +97,24 @@ export default function RecipeDetail() {
     }
     if (isSuspended) {
       toast.error('Your account is on hold. Favoriting recipes is currently disabled.');
+      return;
+    }
+    if (!isUuid(id)) {
+      try {
+        const key = `recipe_rebel_favs_${user.id}`;
+        const stored: string[] = JSON.parse(localStorage.getItem(key) || '[]');
+        if (isFavorite) {
+          localStorage.setItem(key, JSON.stringify(stored.filter((x) => x !== id)));
+          toast.success('Removed from favorites');
+          setIsFavorite(false);
+        } else {
+          localStorage.setItem(key, JSON.stringify([...new Set([...stored, id])]));
+          toast.success('Added to favorites');
+          setIsFavorite(true);
+        }
+      } catch {
+        toast.error('Failed to update favorites');
+      }
       return;
     }
     if (isFavorite) {
@@ -121,15 +151,40 @@ export default function RecipeDetail() {
   };
 
   const fetchComments = async () => {
-    const { data } = await supabase
+    if (!id) return;
+    if (!isUuid(id)) {
+      try {
+        const stored = localStorage.getItem(`recipe_rebel_comments_${id}`);
+        setComments(stored ? JSON.parse(stored) : []);
+      } catch {
+        setComments([]);
+      }
+      return;
+    }
+
+    const { data, error } = await supabase
       .from('comments')
       .select('*, profiles:user_id(name)')
       .eq('recipe_id', id)
       .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Error fetching comments:', error);
+    }
     setComments(data || []);
   };
 
   const fetchUserRating = async () => {
+    if (!id || !user) return;
+    if (!isUuid(id)) {
+      try {
+        const stored = localStorage.getItem(`recipe_rebel_rating_${id}_${user.id}`);
+        if (stored) setUserRating(Number(stored));
+      } catch {
+        // ignore storage errors
+      }
+      return;
+    }
+
     const { data } = await supabase
       .from('ratings')
       .select('rating')
@@ -147,6 +202,13 @@ export default function RecipeDetail() {
     }
     if (isSuspended) {
       toast.error('Your account is on hold. Rating recipes is currently disabled.');
+      return;
+    }
+
+    if (!isUuid(id)) {
+      localStorage.setItem(`recipe_rebel_rating_${id}_${user.id}`, String(rating));
+      setUserRating(rating);
+      toast.success('Rating saved!');
       return;
     }
 
@@ -175,6 +237,7 @@ export default function RecipeDetail() {
       toast.success('Rating saved!');
       fetchRecipe();
     } else {
+      console.error('Rating error:', error);
       toast.error('Failed to save rating');
     }
   };
@@ -197,18 +260,58 @@ export default function RecipeDetail() {
     }
 
     setCommentLoading(true);
-    const { error } = await supabase
-      .from('comments')
-      .insert({ recipe_id: id, user_id: user.id, text: validationResult.data.text });
+    try {
+      if (!isUuid(id)) {
+        const displayName =
+          user.user_metadata?.name ||
+          user.user_metadata?.full_name ||
+          user.email?.split('@')[0] ||
+          'Chef';
+        const localComment = {
+          id: `local-${Date.now()}`,
+          recipe_id: id,
+          user_id: user.id,
+          text: validationResult.data.text,
+          created_at: new Date().toISOString(),
+          profiles: { name: displayName },
+        };
+        const updated = [localComment, ...comments];
+        localStorage.setItem(`recipe_rebel_comments_${id}`, JSON.stringify(updated));
+        setComments(updated);
+        setNewComment('');
+        toast.success('Comment added!');
+        return;
+      }
 
-    if (!error) {
-      setNewComment('');
-      fetchComments();
-      toast.success('Comment added!');
-    } else {
-      toast.error('Failed to add comment');
+      let { error } = await supabase
+        .from('comments')
+        .insert({ recipe_id: id, user_id: user.id, text: validationResult.data.text });
+
+      // If user's profile row doesn't exist yet (e.g., OAuth signup before trigger), create it and retry
+      if (error && (error.code === '23503' || error.message?.includes('comments_user_id_fkey'))) {
+        const displayName =
+          user.user_metadata?.name ||
+          user.user_metadata?.full_name ||
+          user.email?.split('@')[0] ||
+          'Chef';
+        await supabase.from('profiles').upsert({ id: user.id, name: displayName });
+        const retry = await supabase
+          .from('comments')
+          .insert({ recipe_id: id, user_id: user.id, text: validationResult.data.text });
+        error = retry.error;
+      }
+
+      if (!error) {
+        setNewComment('');
+        await fetchComments();
+        toast.success('Comment added!');
+      } else {
+        console.error('Comment insert error:', error);
+        toast.error(error.message || 'Failed to add comment');
+      }
+    } finally {
+      setCommentLoading(false);
     }
-    setCommentLoading(false);
   };
 
   const handleDownloadIngredients = () => {
@@ -662,6 +765,13 @@ export default function RecipeDetail() {
                             size="icon"
                             className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-all text-muted-foreground hover:text-destructive"
                             onClick={async () => {
+                              if (!isUuid(id)) {
+                                const updated = comments.filter((c) => c.id !== comment.id);
+                                localStorage.setItem(`recipe_rebel_comments_${id}`, JSON.stringify(updated));
+                                setComments(updated);
+                                toast.success('Comment deleted');
+                                return;
+                              }
                               const { error } = await supabase.from('comments').delete().eq('id', comment.id);
                               if (!error) {
                                 toast.success('Comment deleted');

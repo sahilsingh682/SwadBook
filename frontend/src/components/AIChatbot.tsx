@@ -12,6 +12,73 @@ interface Message {
   content: string;
 }
 
+function renderInlineFormatting(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return (
+        <strong key={i} className="font-semibold text-foreground">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      return (
+        <span key={i} className="italic">
+          {part.slice(1, -1)}
+        </span>
+      );
+    }
+    return <span key={i}>{part.replace(/\*/g, '')}</span>;
+  });
+}
+
+function FormattedMessage({ content }: { content: string }) {
+  const lines = content.split('\n');
+
+  return (
+    <div className="text-sm space-y-1.5 leading-relaxed">
+      {lines.map((rawLine, idx) => {
+        const line = rawLine.trim();
+        if (!line) {
+          return <div key={idx} className="h-1" />;
+        }
+
+        const headingMatch = line.match(/^#{1,3}\s+(.*)$/);
+        if (headingMatch) {
+          return (
+            <p key={idx} className="font-semibold text-foreground pt-1">
+              {renderInlineFormatting(headingMatch[1])}
+            </p>
+          );
+        }
+
+        const bulletMatch = line.match(/^(?:[-*•])\s+(.*)$/);
+        if (bulletMatch) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-1">
+              <span className="text-primary font-bold mt-0.5">•</span>
+              <span className="flex-1">{renderInlineFormatting(bulletMatch[1])}</span>
+            </div>
+          );
+        }
+
+        const orderedMatch = line.match(/^(\d+\.)\s+(.*)$/);
+        if (orderedMatch) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-1">
+              <span className="font-semibold text-primary shrink-0">{orderedMatch[1]}</span>
+              <span className="flex-1">{renderInlineFormatting(orderedMatch[2])}</span>
+            </div>
+          );
+        }
+
+        return <p key={idx}>{renderInlineFormatting(line)}</p>;
+      })}
+    </div>
+  );
+}
+
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -129,7 +196,11 @@ export function AIChatbot() {
                         : 'bg-muted'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <FormattedMessage content={message.content} />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    )}
                   </div>
                 </div>
               ))}

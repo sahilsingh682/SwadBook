@@ -1,7 +1,7 @@
 {
-  "name": "Zaika - Regional Cuisine & AI Dietician",
-  "short_name": "Zaika",
-  "description": "Discover authentic regional Indian recipes, track macros, and chat with our AI Dietician.",
+  "name": "SwadBook - India's Shared Recipe Book & AI Dietician",
+  "short_name": "SwadBook",
+  "description": "Discover, save, and share authentic Indian recipes from every state with verified nutrition and an AI Dietician.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

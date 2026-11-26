@@ -66,7 +66,7 @@ export default function SharePreviewModal({ open, onOpenChange, recipe }: ShareP
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              {window.location.host || 'reciperebel.vercel.app'} • by {recipe.profiles?.name || 'Zaika Chef'}
+              {window.location.host || 'swadbook.vercel.com'} • by {recipe.profiles?.name || 'SwadBook Chef'}
             </p>
           </div>
         </div>

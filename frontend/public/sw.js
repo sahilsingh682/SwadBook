@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zaika-v2';
+const CACHE_NAME = 'swadbook-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',

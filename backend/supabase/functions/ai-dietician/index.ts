@@ -189,16 +189,16 @@ serve(async (req) => {
       : 'No matching recipes found in database.';
 
     // STEP 2 (AUGMENT): Ground system prompt with retrieved recipes
-    const systemPrompt = `You are Zaika AI Dietician — a warm, friendly, conversational culinary nutritionist and fitness dietitian for Zaika.
-You are running inside a Retrieval-Augmented Generation (RAG) pipeline grounded in Zaika's live Supabase recipe catalog.
+    const systemPrompt = `You are SwadBook AI Dietician — a warm, friendly, conversational culinary nutritionist and fitness dietitian for SwadBook.
+You are running inside a Retrieval-Augmented Generation (RAG) pipeline grounded in SwadBook's live Supabase recipe catalog.
 
-RETRIEVED ZAIKA RECIPES CONTEXT:
+RETRIEVED SWADBOOK RECIPES CONTEXT:
 ${ragContext}
 
 STRICT GUIDELINES:
 1. Be natural and conversational! If the user says casual greetings, thanks, or conversational remarks in English or Hinglish (e.g. "hi", "ohhhoooo accha", "sure understood", "thanks"), reply warmly and naturally like a helpful human assistant.
-2. When the user asks about any recipe, dish, ingredient, protein/calorie/carb/fat macros, regional Indian food, or diet/gym meal plan, answer accurately using the RETRIEVED ZAIKA RECIPES CONTEXT above (citing exact dish names, state origin, calories, protein, carbs, fat, and steps/ingredients when asked).
-3. ONLY if the user asks a clear off-topic factual question unrelated to food, recipes, cooking, health, fitness, or nutrition (e.g., politics, ministers, coding, movies, general trivia), politely reply: "I'm your Zaika AI Dietician! I can only help with Zaika recipes, food, nutrition, and diet/fitness meal plans."
+2. When the user asks about any recipe, dish, ingredient, protein/calorie/carb/fat macros, regional Indian food, or diet/gym meal plan, answer accurately using the RETRIEVED SWADBOOK RECIPES CONTEXT above (citing exact dish names, state origin, calories, protein, carbs, fat, and steps/ingredients when asked).
+3. ONLY if the user asks a clear off-topic factual question unrelated to food, recipes, cooking, health, fitness, or nutrition (e.g., politics, ministers, coding, movies, general trivia), politely reply: "I'm your SwadBook AI Dietician! I can only help with SwadBook recipes, food, nutrition, and diet/fitness meal plans."
 4. Keep responses concise, well-formatted, and helpful.`;
 
     const sources = retrievedRecipes.map((r) => ({
@@ -255,9 +255,9 @@ STRICT GUIDELINES:
     }
 
     // STEP 3B (RAG FALLBACK): Grounded response using retrieved Supabase recipes even without Gemini key
-    let fallbackReply = `Hello! I am your **Zaika AI Dietician**. 🥗\n\n`;
+    let fallbackReply = `Hello! I am your **SwadBook AI Dietician**. 🥗\n\n`;
     if (retrievedRecipes.length > 0) {
-      fallbackReply += `### 📌 Top Matching Recipes from Zaika\n`;
+      fallbackReply += `### 📌 Top Matching Recipes from SwadBook\n`;
       for (const r of retrievedRecipes) {
         fallbackReply += `- **${r.title}** (${r.state || 'Regional'} · ${r.dietary_type || 'veg'}): **${r.calories ?? '—'} kcal**, **${r.protein ?? '—'}g protein**, ${r.preparation_time} min\n`;
       }
@@ -277,7 +277,7 @@ STRICT GUIDELINES:
     console.error('Error in ai-dietician RAG function:', error);
     return new Response(
       JSON.stringify({
-        response: "Hello! I am your Zaika AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!",
+        response: "Hello! I am your SwadBook AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!",
         sources: [],
         rag_enabled: true
       }),

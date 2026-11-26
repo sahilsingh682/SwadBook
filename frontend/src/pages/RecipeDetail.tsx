@@ -342,11 +342,11 @@ export default function RecipeDetail() {
   };
 
   const handleShareWhatsApp = () => {
-    shareToWhatsApp(recipe?.title || 'Zaika Recipe');
+    shareToWhatsApp(recipe?.title || 'SwadBook Recipe');
   };
 
   const handleShareTwitter = () => {
-    shareToTwitter(recipe?.title || 'Zaika Recipe');
+    shareToTwitter(recipe?.title || 'SwadBook Recipe');
   };
 
   const handleCopyLink = () => {

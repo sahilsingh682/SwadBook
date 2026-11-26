@@ -1,12 +1,12 @@
 import { toast } from 'sonner';
 
 export function shareToWhatsApp(title: string, url: string = window.location.href) {
-  const text = `Check out this Zaika recipe: ${title}\n${url}`;
+  const text = `Check out this SwadBook recipe: ${title}\n${url}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
 }
 
 export function shareToTwitter(title: string, url: string = window.location.href) {
-  const text = `Check out this Zaika recipe: ${title}`;
+  const text = `Check out this SwadBook recipe: ${title}`;
   window.open(
     `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
     '_blank',

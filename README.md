@@ -1,11 +1,11 @@
 <div align="center">
 
-# 🍲 Zaika
+# 🍲 SwadBook
 
 ### **Bold Flavors. Smart Macros.**
 *A full-stack regional culinary discovery, macro-nutrition tracking, PWA-enabled, and AI-powered meal planning platform built with React 18, Vite 5, Supabase (PostgreSQL 15), and Google Gemini.*
 
-[![Live Demo](https://img.shields.io/badge/Live_App-reciperebel.vercel.app-EA580C?style=for-the-badge&logo=vercel&logoColor=white)](https://reciperebel.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_App-swadbook.vercel.com-EA580C?style=for-the-badge&logo=vercel&logoColor=white)](https://swadbook.vercel.com)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_15-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
@@ -13,7 +13,7 @@
 
 <br />
 
-<img src="docs/screenshots/home-hero.png" alt="Zaika Landing Hero" width="100%" />
+<img src="docs/screenshots/home-hero.png" alt="SwadBook Landing Hero" width="100%" />
 
 </div>
 
@@ -71,7 +71,7 @@
 
 ## 🌟 Overview
 
-**Zaika** bridges authentic regional Indian cuisine with modern fitness nutrition. Guests can explore curated state dishes, inspect macro profiles, install the app as a **Progressive Web App (PWA)**, and consult the floating **AI Dietician** without creating an account — while registered users can upload recipes, leave star ratings and comments, save favorites, and manage their culinary dashboard. Administrators moderate submissions and enforce community guidelines from a dedicated `/admin` console.
+**SwadBook** bridges authentic regional Indian cuisine with modern fitness nutrition. Guests can explore curated state dishes, inspect macro profiles, install the app as a **Progressive Web App (PWA)**, and consult the floating **AI Dietician** without creating an account — while registered users can upload recipes, leave star ratings and comments, save favorites, and manage their culinary dashboard. Administrators moderate submissions and enforce community guidelines from a dedicated `/admin` console.
 
 ---
 
@@ -224,8 +224,8 @@ recipe_rebel/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/sahilsingh682/reciperebel.git
-cd reciperebel
+git clone https://github.com/sahilsingh682/SwadBook.git
+cd SwadBook
 
 # 2. Install dependencies
 npm install
@@ -279,8 +279,8 @@ Add these public variables in **Vercel → Project Settings → Environment Vari
 ### Auth Redirect URLs
 In **Supabase Dashboard → Authentication → URL Configuration**, add:
 - `http://localhost:5173/**`
-- `https://reciperebel.vercel.app/**`
-- `https://reciperebel.vercel.app/reset-password`
+- `https://swadbook.vercel.com/**`
+- `https://swadbook.vercel.com/reset-password`
 
 ---
 

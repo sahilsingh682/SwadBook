@@ -165,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
 
-    toast.success('Welcome back to Zaika!');
+    toast.success('Welcome back to SwadBook!');
     navigate('/');
   };
 

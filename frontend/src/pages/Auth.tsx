@@ -170,9 +170,9 @@ export default function Auth() {
             </div>
             <div>
               <h2 className="text-2xl font-display font-bold tracking-tight">
-                Zai<span className="text-primary">ka</span>
+                Swad<span className="text-primary">Book</span>
               </h2>
-              <p className="text-muted-foreground text-sm mt-1">Your culinary &amp; macro journey starts here</p>
+              <p className="text-muted-foreground text-sm mt-1">India&apos;s shared recipe book starts here</p>
             </div>
           </div>
 
@@ -188,7 +188,7 @@ export default function Auth() {
                   <Input
                     id="reset-email"
                     type="email"
-                    placeholder="chef@reciperebel.com"
+                    placeholder="chef@swadbook.com"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     className="h-11 bg-muted/40 border-border/50 focus:bg-background transition-colors"
@@ -222,7 +222,7 @@ export default function Auth() {
                       <Input
                         id="signin-email"
                         type="email"
-                        placeholder="chef@reciperebel.com"
+                        placeholder="chef@swadbook.com"
                         value={signInEmail}
                         onChange={(e) => setSignInEmail(e.target.value)}
                         className="h-11 bg-muted/40 border-border/50 focus:bg-background transition-colors"
@@ -269,7 +269,7 @@ export default function Auth() {
                       <Input
                         id="signup-email"
                         type="email"
-                        placeholder="chef@reciperebel.com"
+                        placeholder="chef@swadbook.com"
                         value={signUpEmail}
                         onChange={(e) => setSignUpEmail(e.target.value)}
                         className="h-11 bg-muted/40 border-border/50 focus:bg-background transition-colors"

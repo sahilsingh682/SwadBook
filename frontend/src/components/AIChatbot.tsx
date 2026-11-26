@@ -51,7 +51,7 @@ const FOOD_DOMAIN_KEYWORDS = [
   'protein', 'carb', 'carbs', 'fat', 'fats', 'calorie', 'calories', 'kcal', 'fiber',
   'macro', 'macros', 'gym', 'workout', 'muscle', 'weight', 'fat loss', 'breakfast',
   'lunch', 'dinner', 'snack', 'snacks', 'veg', 'vegetarian', 'non-veg', 'vegan',
-  'cook', 'cooking', 'ingredient', 'ingredients', 'eat', 'eating', 'healthy', 'zaika',
+  'cook', 'cooking', 'ingredient', 'ingredients', 'eat', 'eating', 'healthy', 'swadbook',
   'punjab', 'maharashtra', 'tamil', 'andhra', 'rajasthan', 'bengal', 'gujarat', 'kashmir',
   'goa', 'uttar pradesh', 'dal', 'paneer', 'chicken', 'fish', 'mutton', 'dosa', 'idli',
   'biryani', 'roti', 'pav', 'poha', 'dhokla', 'thepla', 'khichdi', 'kebab', 'curry', 'saag',
@@ -73,8 +73,8 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   if (GREETING_REGEX.test(trimmed)) {
     return {
       response:
-        `👋 Hello! Welcome to **Zaika**!\n\n` +
-        `Ask me about any dish on Zaika (like *Classic Dal Makhani* or *Amritsari Butter Chicken*), protein & calorie breakdowns, or personalized gym & weight-loss meal plans.`,
+        `👋 Hello! Welcome to **SwadBook**!\n\n` +
+        `Ask me about any dish on SwadBook (like *Classic Dal Makhani* or *Amritsari Butter Chicken*), protein & calorie breakdowns, or personalized gym & weight-loss meal plans.`,
       sources: [],
     };
   }
@@ -86,13 +86,13 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   if (!hasDomainKeywordPre && !hasOffTopicPre) {
     if (words.some((w) => THANKS_WORDS.includes(w))) {
       return {
-        response: `You're very welcome! 😊 Anytime you want a Zaika recipe, macro check, or meal plan, just ask!`,
+        response: `You're very welcome! 😊 Anytime you want a SwadBook recipe, macro check, or meal plan, just ask!`,
         sources: [],
       };
     }
     if ((words.some((w) => ACK_WORDS.includes(w)) && words.length <= 6) || (!looksLikeQuestion && words.length <= 4)) {
       return {
-        response: `Got it! 😊 Let me know whenever you'd like to explore a Zaika recipe, check protein & macros, or plan a meal.`,
+        response: `Got it! 😊 Let me know whenever you'd like to explore a SwadBook recipe, check protein & macros, or plan a meal.`,
         sources: [],
       };
     }
@@ -176,12 +176,12 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   const best = scored[0];
   const hasAnyRecipeMatch = best && best.score > 0;
 
-  // 3. Off-topic guard: if query is unrelated to Zaika recipes, food, diet, or nutrition
+  // 3. Off-topic guard: if query is unrelated to SwadBook recipes, food, diet, or nutrition
   if (!hasDomainKeyword && !hasAnyRecipeMatch) {
     return {
       response:
-        `I'm your **Zaika AI Dietician**! 🥗\n\n` +
-        `I can only help with questions related to **Zaika recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
+        `I'm your **SwadBook AI Dietician**! 🥗\n\n` +
+        `I can only help with questions related to **SwadBook recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
       sources: [],
     };
   }
@@ -209,11 +209,11 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
     .slice(0, 3)
     .map((s) => s.r);
 
-  let intro = `### 🥗 Zaika Recommendations\n`;
+  let intro = `### 🥗 SwadBook Recommendations\n`;
   if (q.includes('protein') || q.includes('gym') || q.includes('muscle')) {
-    intro = `### 💪 High-Protein & Gym Diet Picks from Zaika\n`;
+    intro = `### 💪 High-Protein & Gym Diet Picks from SwadBook\n`;
   } else if (q.includes('weight loss') || q.includes('fat loss') || q.includes('low cal')) {
-    intro = `### 🎯 Light & Balanced Picks from Zaika\n`;
+    intro = `### 🎯 Light & Balanced Picks from SwadBook\n`;
   }
 
   const lines = top.map(
@@ -397,7 +397,7 @@ export function AIChatbot() {
               <div>
                 <h3 className="font-semibold leading-none">AI Dietician</h3>
                 <span className="text-[10px] opacity-85 flex items-center gap-1 mt-0.5">
-                  <Sparkles className="h-2.5 w-2.5" /> RAG · Grounded in Zaika Recipes
+                  <Sparkles className="h-2.5 w-2.5" /> RAG · Grounded in SwadBook Recipes
                 </span>
               </div>
             </div>
@@ -416,9 +416,9 @@ export function AIChatbot() {
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground text-sm py-4 space-y-4">
                 <div>
-                  <p className="mb-1.5 font-medium text-foreground">👋 Hi! I&apos;m your Zaika AI Dietician.</p>
+                  <p className="mb-1.5 font-medium text-foreground">👋 Hi! I&apos;m your SwadBook AI Dietician.</p>
                   <p className="text-xs">
-                    Powered by RAG — I search live Zaika recipes &amp; macros to give personalized meal recommendations.
+                    Powered by RAG — I search live SwadBook recipes &amp; macros to give personalized meal recommendations.
                   </p>
                 </div>
                 <div className="space-y-1.5 text-left">

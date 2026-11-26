@@ -229,7 +229,7 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <BrandLogo size="sm" />
             <p className="text-xs text-muted-foreground">
-              Bold Flavors. Smart Macros. &nbsp;·&nbsp; © {new Date().getFullYear()} Zaika. All rights reserved.
+              India&apos;s Shared Recipe Book &nbsp;·&nbsp; © {new Date().getFullYear()} SwadBook. All rights reserved.
             </p>
           </div>
         </div>

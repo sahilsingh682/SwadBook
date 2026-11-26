@@ -18,33 +18,27 @@ export function BrandLogo({ size = 'md', showText = true, textClassName = '' }: 
         aria-hidden="true"
       >
         <defs>
-          <linearGradient id="zaika-logo-bg" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <linearGradient id="sb-logo-bg" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#C2410C" />
             <stop offset="55%" stopColor="#EA580C" />
             <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
-          <linearGradient id="zaika-logo-gold" x1="16" y1="16" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FEF3C7" />
-            <stop offset="100%" stopColor="#FDE68A" />
-          </linearGradient>
         </defs>
-        <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#zaika-logo-bg)" />
-        <rect x="6" y="6" width="52" height="52" rx="12" stroke="url(#zaika-logo-gold)" strokeOpacity="0.35" strokeWidth="1.5" />
+        <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#sb-logo-bg)" />
+        <rect x="6" y="6" width="52" height="52" rx="12" stroke="#FEF3C7" strokeOpacity="0.32" strokeWidth="1.5" />
         <path
-          d="M20 21H43L21 43H44"
+          d="M32 23C28.5 19.5 22.5 18.5 17 19.5V43.5C22.5 42.5 28.5 43.5 32 47C35.5 43.5 41.5 42.5 47 43.5V19.5C41.5 18.5 35.5 19.5 32 23Z"
           stroke="#FFFFFF"
-          strokeWidth="5.5"
+          strokeWidth="3.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <path
-          d="M46 13L47.6 16.4L51 18L47.6 19.6L46 23L44.4 19.6L41 18L44.4 16.4L46 13Z"
-          fill="#FDE68A"
-        />
+        <path d="M32 23V47" stroke="#FDE68A" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M47 13L48.4 16L51.4 17.4L48.4 18.8L47 21.8L45.6 18.8L42.6 17.4L45.6 16L47 13Z" fill="#FDE68A" />
       </svg>
       {showText && (
         <span className={`font-display ${textSize} font-bold tracking-tight ${textClassName}`}>
-          Zai<span className="text-primary">ka</span>
+          Swad<span className="text-primary">Book</span>
         </span>
       )}
     </div>

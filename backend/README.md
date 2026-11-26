@@ -1,6 +1,6 @@
-# Zaika — Backend & Database (Supabase)
+# SwadBook — Backend & Database (Supabase)
 
-This directory contains the database schema, SQL migrations, seed data, storage policies, and serverless Edge Functions for **Zaika**.
+This directory contains the database schema, SQL migrations, seed data, storage policies, and serverless Edge Functions for **SwadBook**.
 
 ---
 

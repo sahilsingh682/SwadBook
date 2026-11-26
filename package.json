@@ -1,8 +1,8 @@
 {
-  "name": "zaika",
+  "name": "swadbook",
   "private": true,
   "version": "1.0.0",
-  "description": "Zaika - Fullstack Regional Cuisine, Macros & AI Dietician Platform",
+  "description": "SwadBook - India's Shared Recipe Book & AI Dietician Platform",
   "workspaces": [
     "frontend"
   ],

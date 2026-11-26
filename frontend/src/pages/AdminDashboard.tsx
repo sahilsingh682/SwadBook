@@ -200,7 +200,14 @@ export default function AdminDashboard() {
         countMap.set(rec.author_id, (countMap.get(rec.author_id) || 0) + 1);
       });
 
-      const combinedUsers: UserProfile[] = (profilesData || []).map((p: any) => ({
+      const combinedUsers: UserProfile[] = (profilesData || []).map((p: {
+        id: string;
+        name: string;
+        status?: string | null;
+        suspension_reason?: string | null;
+        suspended_until?: string | null;
+        created_at: string;
+      }) => ({
         id: p.id,
         name: p.name,
         status: (p.status as 'active' | 'suspended' | 'banned') || 'active',
@@ -255,9 +262,9 @@ export default function AdminDashboard() {
 
       toast.success(`Synced ${payload.length} curated recipes to database!`);
       await fetchRecipes();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error syncing curated recipes:', error);
-      toast.error(error?.message || 'Failed to sync recipes to database');
+      toast.error(error instanceof Error ? error.message : 'Failed to sync recipes to database');
     } finally {
       setActionLoading(false);
     }

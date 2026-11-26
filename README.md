@@ -180,7 +180,7 @@ graph TD
 ## 📁 Directory Structure
 
 ```
-recipe_rebel/
+SwadBook/
 ├── docs/
 │   └── screenshots/              # Website UI screenshots used in documentation
 ├── frontend/                     # Client SPA (React + Vite + TypeScript)

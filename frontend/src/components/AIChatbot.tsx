@@ -104,8 +104,8 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   if (hasOffTopicKeyword && !hasDomainKeyword) {
     return {
       response:
-        `I'm your **Zaika AI Dietician**! 🥗\n\n` +
-        `I can only help with questions related to **Zaika recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
+        `I'm your **SwadBook AI Dietician**! 🥗\n\n` +
+        `I can only help with questions related to **SwadBook recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
       sources: [],
     };
   }

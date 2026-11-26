@@ -33,8 +33,37 @@ export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isSuspended } = useAuth();
-  const [recipe, setRecipe] = useState<any>(null);
-  const [comments, setComments] = useState<any[]>([]);
+  interface DetailRecipe {
+    id: string;
+    title: string;
+    description: string;
+    state?: string | null;
+    dietary_type?: string | null;
+    meal_type?: string | null;
+    tags?: string[] | null;
+    preparation_time?: number | null;
+    calories?: number | null;
+    protein?: number | null;
+    carbs?: number | null;
+    fat?: number | null;
+    average_rating?: number | null;
+    image_url?: string | null;
+    ingredients?: string[];
+    steps?: string[];
+    author_id?: string;
+    created_at?: string;
+    status?: string;
+    profiles?: { name?: string | null } | null;
+  }
+  interface RecipeComment {
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+    profiles?: { name?: string | null } | null;
+  }
+  const [recipe, setRecipe] = useState<DetailRecipe | null>(null);
+  const [comments, setComments] = useState<RecipeComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);

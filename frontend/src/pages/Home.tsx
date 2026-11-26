@@ -68,7 +68,12 @@ export default function Home() {
   const recipesSectionRef = useRef<HTMLDivElement>(null);
 
   // Recipes state
-  const [allRecipes, setAllRecipes] = useState<any[]>(FAMOUS_RECIPES);
+  type HomeRecipe = typeof FAMOUS_RECIPES[number] & {
+    author_id?: string;
+    created_at?: string;
+    profiles?: { name?: string | null } | null;
+  };
+  const [allRecipes, setAllRecipes] = useState<HomeRecipe[]>(FAMOUS_RECIPES);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
@@ -109,8 +114,8 @@ export default function Home() {
         const MASTER_CHEF_ID = '00000000-0000-0000-0000-000000000001';
         const curatedTitles = new Set(FAMOUS_RECIPES.map((r) => r.title.trim().toLowerCase()));
         const curatedIds = new Set(FAMOUS_RECIPES.map((r) => r.id));
-        const communityOnly = data.filter(
-          (r: any) =>
+        const communityOnly = (data as HomeRecipe[]).filter(
+          (r) =>
             r.author_id !== MASTER_CHEF_ID &&
             r.profiles?.name !== 'Master Chef Rebel' &&
             !curatedIds.has(r.id) &&

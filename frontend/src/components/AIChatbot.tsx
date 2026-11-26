@@ -11,11 +11,18 @@ import { FAMOUS_RECIPES } from '@/data/famousRecipes';
 interface RecipeSource {
   id: string;
   title: string;
+  description?: string | null;
   state?: string | null;
   dietary_type?: string | null;
+  meal_type?: string | null;
+  tags?: string[] | null;
   calories?: number | null;
   protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
   preparation_time?: number;
+  ingredients?: string[] | null;
+  steps?: string[] | null;
 }
 
 interface Message {
@@ -24,61 +31,106 @@ interface Message {
   sources?: RecipeSource[];
 }
 
-function localRagSearch(query: string): { response: string; sources: RecipeSource[] } {
-  const tokens = query
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .split(/\s+/)
-    .filter((t) => t.length > 2);
+const STOP_WORDS = new Set([
+  'tell', 'about', 'recipe', 'make', 'cook', 'how', 'what', 'give', 'show', 'want',
+  'need', 'suggest', 'recommend', 'best', 'good', 'some', 'with', 'from', 'that',
+  'this', 'have', 'for', 'the', 'and', 'can', 'you', 'please', 'dish', 'food', 'meal',
+]);
+
+async function smartRagFallback(query: string): Promise<{ response: string; sources: RecipeSource[] }> {
+  // Fetch live approved recipes from Supabase and merge with curated FAMOUS_RECIPES
+  let pool: RecipeSource[] = FAMOUS_RECIPES.map((r) => ({ ...r }));
+  try {
+    const { data } = await supabase
+      .from('recipes')
+      .select('id, title, description, state, dietary_type, meal_type, tags, preparation_time, calories, protein, carbs, fat, ingredients, steps')
+      .eq('status', 'approved')
+      .limit(100);
+    if (data && data.length > 0) {
+      const seenTitles = new Set(data.map((d) => d.title.toLowerCase()));
+      pool = [
+        ...(data as RecipeSource[]),
+        ...pool.filter((p) => !seenTitles.has(p.title.toLowerCase())),
+      ];
+    }
+  } catch {
+    // use FAMOUS_RECIPES pool
+  }
 
   const q = query.toLowerCase();
+  const tokens = q
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length > 2 && !STOP_WORDS.has(t));
+
   const wantNonVeg = q.includes('non-veg') || q.includes('non veg') || q.includes('chicken') || q.includes('fish') || q.includes('mutton');
   const wantVeg = !wantNonVeg && (q.includes('veg') || q.includes('paneer') || q.includes('dal'));
 
-  const scored = FAMOUS_RECIPES.map((r) => {
+  const scored = pool.map((r) => {
+    const titleLower = r.title.toLowerCase();
     const haystack = [
       r.title,
-      r.description,
-      r.state,
-      r.dietary_type,
-      r.meal_type,
-      ...r.tags,
-      ...r.ingredients,
+      r.description || '',
+      r.state || '',
+      r.dietary_type || '',
+      r.meal_type || '',
+      ...(r.tags || []),
+      ...(r.ingredients || []),
     ].join(' ').toLowerCase();
 
     let score = 0;
     for (const token of tokens) {
-      if (r.title.toLowerCase().includes(token)) score += 6;
-      if (r.state.toLowerCase().includes(token)) score += 5;
-      if (r.tags.some((t) => t.includes(token))) score += 4;
+      if (titleLower.includes(token)) score += 10;
+      if ((r.state || '').toLowerCase().includes(token)) score += 5;
+      if ((r.tags || []).some((t) => t.includes(token))) score += 4;
       if (haystack.includes(token)) score += 2;
     }
-    if (wantVeg && r.dietary_type === 'vegetarian') score += 5;
-    if (wantNonVeg && r.dietary_type === 'non-vegetarian') score += 5;
-    if ((q.includes('protein') || q.includes('gym')) && r.protein >= 18) score += 5;
-    if ((q.includes('low cal') || q.includes('weight loss')) && r.calories <= 350) score += 4;
+    if (wantVeg && r.dietary_type === 'vegetarian') score += 3;
+    if (wantNonVeg && r.dietary_type === 'non-vegetarian') score += 3;
+    if ((q.includes('protein') || q.includes('gym') || q.includes('muscle')) && (r.protein || 0) >= 18) score += 5;
+    if ((q.includes('low cal') || q.includes('weight loss') || q.includes('under 350') || q.includes('under 400')) && (r.calories || 999) <= 350) score += 5;
+    if (q.includes('breakfast') && r.meal_type === 'breakfast') score += 4;
+    if (q.includes('lunch') && r.meal_type === 'lunch') score += 4;
+    if (q.includes('dinner') && r.meal_type === 'dinner') score += 4;
+    if (q.includes('snack') && r.meal_type === 'snacks') score += 4;
+
     return { r, score };
   }).sort((a, b) => b.score - a.score);
 
+  const best = scored[0];
+  const isSpecificRecipeQuery =
+    best && best.score >= 10 && (q.includes('recipe') || q.includes('how to') || q.includes('about') || q.includes('ingredients') || q.includes('steps') || q.includes('calories') || q.includes('protein in'));
+
+  // If the user asked about a specific dish (e.g. "Classic Dal Makhani"), return full details!
+  if (isSpecificRecipeQuery) {
+    const r = best.r;
+    const ingredientsList = (r.ingredients || []).map((ing) => `- ${ing}`).join('\n');
+    const stepsList = (r.steps || []).map((st, idx) => `${idx + 1}. ${st}`).join('\n');
+
+    const response =
+      `### 🍲 ${r.title}\n` +
+      `${r.description || ''}\n\n` +
+      `**Origin**: ${r.state || 'Regional'} · **Type**: ${r.dietary_type || 'vegetarian'} · **Prep**: ${r.preparation_time || 30} min\n\n` +
+      `### 📊 Nutrition per Serving\n` +
+      `- **Calories**: ${r.calories ?? '—'} kcal | **Protein**: ${r.protein ?? '—'}g | **Carbs**: ${r.carbs ?? '—'}g | **Fat**: ${r.fat ?? '—'}g\n\n` +
+      (ingredientsList ? `### 🧂 Ingredients\n${ingredientsList}\n\n` : '') +
+      (stepsList ? `### 👨‍🍳 How to Make\n${stepsList}` : '');
+
+    return { response, sources: [r] };
+  }
+
+  // Otherwise return top 3 matching Zaika dishes for the diet/filter query
   const top = (scored.some((s) => s.score > 0) ? scored.filter((s) => s.score > 0) : scored)
     .slice(0, 3)
     .map((s) => s.r);
 
   const lines = top.map(
-    (r) => `- **${r.title}** (${r.state} · ${r.dietary_type}): **${r.calories} kcal**, **${r.protein}g protein**, ${r.preparation_time} min`
+    (r) => `- **${r.title}** (${r.state || 'Regional'} · ${r.dietary_type || 'veg'}): **${r.calories ?? '—'} kcal**, **${r.protein ?? '—'}g protein**, ${r.preparation_time || 30} min`
   );
 
   return {
-    response: `Here are the best matching dishes from **Zaika** for your query:\n\n${lines.join('\n')}\n\nTap any recipe chip below to view full ingredients & steps!`,
-    sources: top.map((r) => ({
-      id: r.id,
-      title: r.title,
-      state: r.state,
-      dietary_type: r.dietary_type,
-      calories: r.calories,
-      protein: r.protein,
-      preparation_time: r.preparation_time,
-    })),
+    response: `### 🥗 Zaika Recommendations\n${lines.join('\n')}\n\nTap any recipe chip below to open full ingredients and cooking steps!`,
+    sources: top,
   };
 }
 
@@ -150,9 +202,9 @@ function FormattedMessage({ content }: { content: string }) {
 }
 
 const STARTER_PROMPTS = [
+  'Tell me about Classic Dal Makhani recipe',
   'High-protein veg gym dinner',
   'Healthy breakfast under 350 kcal',
-  'Famous high-protein dishes from Punjab',
 ];
 
 export function AIChatbot() {
@@ -183,7 +235,8 @@ export function AIChatbot() {
         },
       });
 
-      if (!error && data?.response) {
+      // Only accept Edge Function response if it's from the updated RAG deployment (rag_enabled: true)
+      if (!error && data?.response && data?.rag_enabled) {
         setMessages((prev) => [
           ...prev,
           {
@@ -195,24 +248,24 @@ export function AIChatbot() {
         return;
       }
 
-      // Client-side RAG fallback if edge function is unreachable
-      const fallback = localRagSearch(text);
+      // Run full Hybrid RAG directly over live Supabase + Zaika dataset
+      const ragResult = await smartRagFallback(text);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: fallback.response,
-          sources: fallback.sources,
+          content: ragResult.response,
+          sources: ragResult.sources,
         },
       ]);
     } catch {
-      const fallback = localRagSearch(text);
+      const ragResult = await smartRagFallback(text);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: fallback.response,
-          sources: fallback.sources,
+          content: ragResult.response,
+          sources: ragResult.sources,
         },
       ]);
     } finally {

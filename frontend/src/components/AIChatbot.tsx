@@ -69,7 +69,7 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   const q = trimmed.toLowerCase();
   const words = q.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
 
-  // 1. Handle greetings, acknowledgments, and thanks naturally
+  // 1. Handle greetings and casual conversational remarks naturally (including Hinglish / short chat)
   if (GREETING_REGEX.test(trimmed)) {
     return {
       response:
@@ -81,17 +81,18 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
 
   const hasDomainKeywordPre = FOOD_DOMAIN_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
   const hasOffTopicPre = OFF_TOPIC_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
+  const looksLikeQuestion = q.includes('?') || /^(who|what|where|when|why|which|how|tell|explain|define|name)\b/i.test(trimmed);
 
-  if (!hasDomainKeywordPre && !hasOffTopicPre && words.length <= 6) {
+  if (!hasDomainKeywordPre && !hasOffTopicPre) {
     if (words.some((w) => THANKS_WORDS.includes(w))) {
       return {
         response: `You're very welcome! 😊 Anytime you want a Zaika recipe, macro check, or meal plan, just ask!`,
         sources: [],
       };
     }
-    if (words.some((w) => ACK_WORDS.includes(w))) {
+    if ((words.some((w) => ACK_WORDS.includes(w)) && words.length <= 6) || (!looksLikeQuestion && words.length <= 4)) {
       return {
-        response: `Sounds good! 👍 What dish, regional cuisine, or fitness goal would you like to explore today?`,
+        response: `Got it! 😊 Let me know whenever you'd like to explore a Zaika recipe, check protein & macros, or plan a meal.`,
         sources: [],
       };
     }

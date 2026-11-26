@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ChefHat, Home, Upload, User, LogOut, Shield, AlertTriangle, Sparkles } from 'lucide-react';
 import { AIChatbot } from './AIChatbot';
 import { AuthPromptDialog } from './AuthPromptDialog';
+import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface LayoutProps {
   children: ReactNode;
@@ -39,7 +40,7 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       {/* Account Suspended / On Hold Warning Banner */}
       {user && isSuspended && (
         <div className="bg-destructive text-destructive-foreground px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-center gap-2 shadow-sm text-center">
@@ -68,7 +69,7 @@ export function Layout({ children }: LayoutProps) {
               variant="ghost"
               size="sm"
               onClick={() => navigate('/')}
-              className="transition-smooth text-muted-foreground hover:text-foreground"
+              className="hidden md:inline-flex transition-smooth text-muted-foreground hover:text-foreground"
             >
               <Home className="h-4 w-4 mr-1.5" />
               <span className="text-sm">Explore</span>
@@ -78,10 +79,10 @@ export function Layout({ children }: LayoutProps) {
               variant="ghost"
               size="sm"
               onClick={handleUploadClick}
-              className="transition-smooth text-muted-foreground hover:text-foreground"
+              className="hidden md:inline-flex transition-smooth text-muted-foreground hover:text-foreground"
             >
               <Upload className="h-4 w-4 mr-1.5" />
-              <span className="hidden sm:inline text-sm">Upload Recipe</span>
+              <span className="text-sm">Upload Recipe</span>
             </Button>
 
             {user ? (
@@ -90,10 +91,10 @@ export function Layout({ children }: LayoutProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate('/dashboard')}
-                  className="transition-smooth text-muted-foreground hover:text-foreground"
+                  className="hidden md:inline-flex transition-smooth text-muted-foreground hover:text-foreground"
                 >
                   <User className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline text-sm">Dashboard</span>
+                  <span className="text-sm">Dashboard</span>
                 </Button>
 
                 {isAdmin && (
@@ -101,14 +102,14 @@ export function Layout({ children }: LayoutProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/admin')}
-                    className="transition-smooth text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 font-semibold"
+                    className="hidden md:inline-flex transition-smooth text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 font-semibold"
                   >
                     <Shield className="h-4 w-4 mr-1.5" />
                     <span className="text-sm">Admin</span>
                   </Button>
                 )}
 
-                <div className="w-px h-6 bg-border mx-1 hidden sm:block" />
+                <div className="w-px h-6 bg-border mx-1 hidden md:block" />
 
                 <Button
                   variant="ghost"
@@ -117,7 +118,7 @@ export function Layout({ children }: LayoutProps) {
                   className="transition-smooth text-muted-foreground hover:text-destructive text-sm"
                 >
                   <LogOut className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <span>Sign Out</span>
                 </Button>
               </>
             ) : (
@@ -148,6 +149,76 @@ export function Layout({ children }: LayoutProps) {
 
       {/* AI Chatbot - Available to all users */}
       <AIChatbot />
+
+      {/* PWA Download / Install Popup */}
+      <PWAInstallPrompt />
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+      >
+        <div className="flex items-center justify-around h-16 px-2">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+              location.pathname === '/' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Home className="h-5 w-5" />
+            <span className="text-[11px] leading-none">Explore</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleUploadClick}
+            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+              location.pathname === '/upload' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Upload className="h-5 w-5" />
+            <span className="text-[11px] leading-none">Upload</span>
+          </button>
+
+          {user ? (
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+                location.pathname === '/dashboard' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <User className="h-5 w-5" />
+              <span className="text-[11px] leading-none">Dashboard</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => navigate('/auth')}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+                location.pathname === '/auth' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <User className="h-5 w-5" />
+              <span className="text-[11px] leading-none">Sign In</span>
+            </button>
+          )}
+
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+                location.pathname === '/admin' ? 'text-amber-500 font-semibold' : 'text-amber-500/80 hover:text-amber-500'
+              }`}
+            >
+              <Shield className="h-5 w-5" />
+              <span className="text-[11px] leading-none">Admin</span>
+            </button>
+          )}
+        </div>
+      </nav>
 
       {/* Auth Prompt Modal */}
       <AuthPromptDialog

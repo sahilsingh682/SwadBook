@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
@@ -6,13 +7,153 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Input validation schema
 const messageSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string().max(2000, 'Message too long (max 2000 characters)')
   })).max(20, 'Too many messages (max 20)')
 });
+
+interface RecipeDoc {
+  id: string;
+  title: string;
+  description: string | null;
+  state: string | null;
+  dietary_type: string | null;
+  meal_type: string | null;
+  tags: string[] | null;
+  preparation_time: number;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  ingredients: string[] | null;
+  image_url: string | null;
+}
+
+function detectIntentFilters(query: string) {
+  const q = query.toLowerCase();
+  const dietary =
+    q.includes('non-veg') || q.includes('non veg') || q.includes('chicken') || q.includes('fish') || q.includes('mutton') || q.includes('meat')
+      ? 'non-vegetarian'
+      : q.includes('veg') || q.includes('paneer') || q.includes('dal')
+        ? 'vegetarian'
+        : null;
+
+  const mealType =
+    q.includes('breakfast') ? 'breakfast'
+      : q.includes('lunch') ? 'lunch'
+      : q.includes('dinner') ? 'dinner'
+      : q.includes('snack') || q.includes('chaat') ? 'snacks'
+      : null;
+
+  const states = ['punjab', 'maharashtra', 'tamil nadu', 'andhra', 'rajasthan', 'west bengal', 'bengal', 'gujarat', 'kashmir', 'goa', 'uttar pradesh'];
+  const state = states.find((s) => q.includes(s)) || null;
+
+  return { dietary, mealType, state };
+}
+
+function scoreRecipe(recipe: RecipeDoc, query: string, filters: ReturnType<typeof detectIntentFilters>): number {
+  const tokens = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length > 2);
+
+  const haystack = [
+    recipe.title,
+    recipe.description || '',
+    recipe.state || '',
+    recipe.dietary_type || '',
+    recipe.meal_type || '',
+    ...(recipe.tags || []),
+    ...(recipe.ingredients || []),
+  ].join(' ').toLowerCase();
+
+  let score = 0;
+  for (const token of tokens) {
+    if (recipe.title.toLowerCase().includes(token)) score += 6;
+    if ((recipe.state || '').toLowerCase().includes(token)) score += 5;
+    if ((recipe.tags || []).some((tag) => tag.includes(token))) score += 4;
+    if (haystack.includes(token)) score += 2;
+  }
+
+  if (filters.dietary && recipe.dietary_type === filters.dietary) score += 5;
+  if (filters.mealType && recipe.meal_type === filters.mealType) score += 4;
+  if (filters.state && (recipe.state || '').toLowerCase().includes(filters.state)) score += 6;
+
+  // Boost high-protein recipes when fitness/gym/protein is requested
+  const q = query.toLowerCase();
+  if ((q.includes('protein') || q.includes('gym') || q.includes('muscle')) && (recipe.protein || 0) >= 18) {
+    score += 5;
+  }
+  if ((q.includes('low cal') || q.includes('weight loss') || q.includes('fat loss')) && (recipe.calories || 999) <= 350) {
+    score += 4;
+  }
+
+  return score;
+}
+
+async function generateGeminiEmbedding(text: string, apiKey: string): Promise<number[] | null> {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: { parts: [{ text }] },
+        }),
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.embedding?.values || null;
+  } catch {
+    return null;
+  }
+}
+
+async function retrieveRelevantRecipes(query: string, geminiKey?: string): Promise<RecipeDoc[]> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseKey) return [];
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const filters = detectIntentFilters(query);
+
+  // 1. Try pgvector semantic search first when Gemini key + embeddings exist
+  if (geminiKey) {
+    const embedding = await generateGeminiEmbedding(query, geminiKey);
+    if (embedding) {
+      const { data: vectorMatches, error: rpcError } = await supabase.rpc('match_recipes', {
+        query_embedding: embedding,
+        match_count: 5,
+        filter_dietary: filters.dietary,
+        filter_state: filters.state,
+      });
+      if (!rpcError && Array.isArray(vectorMatches) && vectorMatches.length > 0) {
+        return vectorMatches as RecipeDoc[];
+      }
+    }
+  }
+
+  // 2. Hybrid lexical + metadata retrieval over approved recipes in Supabase
+  const { data: allApproved, error } = await supabase
+    .from('recipes')
+    .select('id, title, description, state, dietary_type, meal_type, tags, preparation_time, calories, protein, carbs, fat, ingredients, image_url')
+    .eq('status', 'approved')
+    .limit(100);
+
+  if (error || !allApproved || allApproved.length === 0) return [];
+
+  const ranked = (allApproved as RecipeDoc[])
+    .map((r) => ({ recipe: r, score: scoreRecipe(r, query, filters) }))
+    .sort((a, b) => b.score - a.score);
+
+  const top = ranked.filter((item) => item.score > 0).slice(0, 4).map((item) => item.recipe);
+  return top.length > 0 ? top : (allApproved as RecipeDoc[]).slice(0, 3);
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,9 +163,8 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const validationResult = messageSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      console.error('Validation error:', validationResult.error.errors);
       return new Response(
         JSON.stringify({ error: 'Invalid input format', details: validationResult.error.errors }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -32,25 +172,49 @@ serve(async (req) => {
     }
 
     const { messages } = validationResult.data;
-    const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
-
+    const lastUserMessage = messages.filter((m) => m.role === 'user').pop()?.content || '';
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
+    // STEP 1 (RETRIEVE): Fetch relevant recipes from Zaika's Supabase database
+    const retrievedRecipes = await retrieveRelevantRecipes(lastUserMessage, GEMINI_API_KEY);
+
+    const ragContext = retrievedRecipes.length > 0
+      ? retrievedRecipes.map((r, i) => (
+          `[${i + 1}] ${r.title} (${r.state || 'Regional'}, ${r.dietary_type || 'vegetarian'}, ${r.meal_type || 'meal'})` +
+          ` | ${r.calories ?? '?'} kcal, ${r.protein ?? '?'}g protein, ${r.carbs ?? '?'}g carbs, ${r.fat ?? '?'}g fat` +
+          ` | Prep: ${r.preparation_time} min` +
+          ` | Tags: ${(r.tags || []).join(', ') || 'none'}` +
+          ` | Key Ingredients: ${(r.ingredients || []).slice(0, 6).join(', ')}`
+        )).join('\n')
+      : 'No matching recipes found in database.';
+
+    // STEP 2 (AUGMENT): Ground system prompt with retrieved recipes
     const systemPrompt = `You are an expert Dietician and Culinary Nutritionist for Zaika.
-Your role is to provide accurate, empowering advice on nutrition, healthy eating, gym diets, macronutrients (protein, carbs, fat, calories), regional Indian cuisines, and recipe substitutions.
+You are running inside a Retrieval-Augmented Generation (RAG) pipeline grounded in Zaika's live Supabase recipe catalog.
+
+RETRIEVED ZAIKA RECIPES CONTEXT:
+${ragContext}
 
 STRICT GUIDELINES:
-1. ONLY answer questions related to diet, fitness, food nutrition, healthy eating, gym meal planning, and recipes.
-2. If the user asks about unrelated topics (coding, politics, general trivia), respond with: "I am your Zaika AI Dietician. Please ask a food, diet, nutrition, or recipe-related question!"
-3. When asked for diet plans, provide specific breakdowns: Calories, Protein, Carbs, Fats, and suggest authentic regional meals (e.g. Dal Makhani, Sambar, Idli, Paneer Tikka, Sprouts, Grilled Chicken).
-4. Be enthusiastic, clear, supportive, and practical.`;
+1. Prioritize recommending dishes from the RETRIEVED ZAIKA RECIPES CONTEXT above, citing their exact dish names, state origin, calories, and protein/carb/fat macros.
+2. ONLY answer questions related to diet, fitness, food nutrition, healthy eating, gym meal planning, and recipes.
+3. If the user asks about unrelated topics, respond with: "I am your Zaika AI Dietician. Please ask a food, diet, nutrition, or recipe-related question!"
+4. Keep responses concise, structured with clear bullet points, and practical.`;
 
-    // -------------------------------------------------------------
-    // OPTION 1: Direct Google Gemini API (if GEMINI_API_KEY is set)
-    // -------------------------------------------------------------
+    const sources = retrievedRecipes.map((r) => ({
+      id: r.id,
+      title: r.title,
+      state: r.state,
+      dietary_type: r.dietary_type,
+      calories: r.calories,
+      protein: r.protein,
+      preparation_time: r.preparation_time,
+    }));
+
+    // STEP 3 (GENERATE): Call Google Gemini API with augmented context
     if (GEMINI_API_KEY) {
       try {
-        const contents = messages.map(m => ({
+        const contents = messages.map((m) => ({
           role: m.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: m.content }]
         }));
@@ -64,7 +228,7 @@ STRICT GUIDELINES:
               contents,
               systemInstruction: { parts: [{ text: systemPrompt }] },
               generationConfig: {
-                temperature: 0.7,
+                temperature: 0.6,
                 maxOutputTokens: 1000,
               }
             })
@@ -76,61 +240,44 @@ STRICT GUIDELINES:
           const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
           if (reply) {
             return new Response(
-              JSON.stringify({ response: reply }),
+              JSON.stringify({ response: reply, sources, rag_enabled: true }),
               { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
           }
         } else {
-          console.error('Google Gemini API returned status:', response.status, await response.text());
+          console.error('Google Gemini API status:', response.status, await response.text());
         }
       } catch (err) {
         console.error('Gemini API fetch error:', err);
       }
     }
 
-    // -------------------------------------------------------------
-    // OPTION 2: Built-in Intelligent Fallback Nutrition Engine
-    // (Ensures the chatbot always works reliably without 500 errors)
-    // -------------------------------------------------------------
-    const lower = lastUserMessage.toLowerCase();
+    // STEP 3B (RAG FALLBACK): Grounded response using retrieved Supabase recipes even without Gemini key
     let fallbackReply = `Hello! I am your **Zaika AI Dietician**. 🥗\n\n`;
-
-    if (lower.includes('protein') || lower.includes('gym') || lower.includes('muscle')) {
-      fallbackReply += `### 💪 High-Protein / Gym Diet Recommendations:\n` +
-        `- **Vegetarian**: Paneer Tikka (18g protein / 100g), Soya Chunks (52g protein / 100g), Greek Yogurt with Nuts, Dal Makhani, Moong Dal Sprout Salad.\n` +
-        `- **Non-Vegetarian**: Tandoori Chicken Breast (31g protein / 100g), Amritsari Fish Fry (24g protein / 100g), Egg White Bhurji.\n` +
-        `**Pro-Tip**: Aim for 1.6g to 2.2g of protein per kg of bodyweight if you are lifting weights!`;
-    } else if (lower.includes('weight loss') || lower.includes('fat loss') || lower.includes('diet plan')) {
-      fallbackReply += `### 🎯 Balanced Weight Loss Strategy:\n` +
-        `1. **Breakfast**: Steamed Idli Sambar or Moong Dal Chilla with Mint Chutney (~250 kcal).\n` +
-        `2. **Lunch**: 2 Multigrain Rotis + 1 bowl Tadka Dal + 1 bowl Seasonal Sabzi + Cucumber Salad (~450 kcal).\n` +
-        `3. **Snack**: Roasted Makhana or Boiled Chana Chaat with Lemon (~150 kcal).\n` +
-        `4. **Dinner**: Grilled Paneer/Chicken Salad or Light Vegetable Khichdi (~350 kcal).\n` +
-        `*Maintain a modest 300-500 calorie deficit for sustainable results!*`;
-    } else if (lower.includes('fiber') || lower.includes('digestion')) {
-      fallbackReply += `### 🌾 High-Fiber Food Suggestions:\n` +
-        `- **Legumes & Lentils**: Rajma, Chole, Kala Chana, Green Moong.\n` +
-        `- **Whole Grains**: Makki Roti, Bajra, Oats, Brown Basmati Rice.\n` +
-        `- **Veggies**: Sarson Ka Saag, Bhindi (Okra), Palak (Spinach), and Carrots.\n` +
-        `Aim for 25-30g of dietary fiber daily for optimal gut health and steady energy!`;
+    if (retrievedRecipes.length > 0) {
+      fallbackReply += `### 📌 Top Matching Recipes from Zaika\n`;
+      for (const r of retrievedRecipes) {
+        fallbackReply += `- **${r.title}** (${r.state || 'Regional'} · ${r.dietary_type || 'veg'}): **${r.calories ?? '—'} kcal**, **${r.protein ?? '—'}g protein**, ${r.preparation_time} min\n`;
+      }
+      fallbackReply += `\nTap any recipe card below to view full ingredients and cooking steps!`;
     } else {
       fallbackReply += `I'm here to help you personalize your meals and hit your fitness goals! You can ask me:\n` +
         `• "Suggest a high-protein vegetarian gym diet"\n` +
         `• "What are healthy breakfast ideas under 400 calories?"\n` +
-        `• "How much protein is in Paneer Tikka vs Chicken Tikka?"\n` +
-        `• "Give me a 1500 calorie Indian meal plan"`;
+        `• "Recommend a high-protein dish from Punjab"`;
     }
 
     return new Response(
-      JSON.stringify({ response: fallbackReply }),
+      JSON.stringify({ response: fallbackReply, sources, rag_enabled: true }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
-    console.error('Error in ai-dietician function:', error);
+    console.error('Error in ai-dietician RAG function:', error);
     return new Response(
-      JSON.stringify({ 
-        response: "Hello! I am your Zaika AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!" 
+      JSON.stringify({
+        response: "Hello! I am your Zaika AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!",
+        sources: [],
+        rag_enabled: true
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

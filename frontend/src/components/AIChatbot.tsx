@@ -1,15 +1,85 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, ArrowUpRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { FAMOUS_RECIPES } from '@/data/famousRecipes';
+
+interface RecipeSource {
+  id: string;
+  title: string;
+  state?: string | null;
+  dietary_type?: string | null;
+  calories?: number | null;
+  protein?: number | null;
+  preparation_time?: number;
+}
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  sources?: RecipeSource[];
+}
+
+function localRagSearch(query: string): { response: string; sources: RecipeSource[] } {
+  const tokens = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((t) => t.length > 2);
+
+  const q = query.toLowerCase();
+  const wantNonVeg = q.includes('non-veg') || q.includes('non veg') || q.includes('chicken') || q.includes('fish') || q.includes('mutton');
+  const wantVeg = !wantNonVeg && (q.includes('veg') || q.includes('paneer') || q.includes('dal'));
+
+  const scored = FAMOUS_RECIPES.map((r) => {
+    const haystack = [
+      r.title,
+      r.description,
+      r.state,
+      r.dietary_type,
+      r.meal_type,
+      ...r.tags,
+      ...r.ingredients,
+    ].join(' ').toLowerCase();
+
+    let score = 0;
+    for (const token of tokens) {
+      if (r.title.toLowerCase().includes(token)) score += 6;
+      if (r.state.toLowerCase().includes(token)) score += 5;
+      if (r.tags.some((t) => t.includes(token))) score += 4;
+      if (haystack.includes(token)) score += 2;
+    }
+    if (wantVeg && r.dietary_type === 'vegetarian') score += 5;
+    if (wantNonVeg && r.dietary_type === 'non-vegetarian') score += 5;
+    if ((q.includes('protein') || q.includes('gym')) && r.protein >= 18) score += 5;
+    if ((q.includes('low cal') || q.includes('weight loss')) && r.calories <= 350) score += 4;
+    return { r, score };
+  }).sort((a, b) => b.score - a.score);
+
+  const top = (scored.some((s) => s.score > 0) ? scored.filter((s) => s.score > 0) : scored)
+    .slice(0, 3)
+    .map((s) => s.r);
+
+  const lines = top.map(
+    (r) => `- **${r.title}** (${r.state} · ${r.dietary_type}): **${r.calories} kcal**, **${r.protein}g protein**, ${r.preparation_time} min`
+  );
+
+  return {
+    response: `Here are the best matching dishes from **Zaika** for your query:\n\n${lines.join('\n')}\n\nTap any recipe chip below to view full ingredients & steps!`,
+    sources: top.map((r) => ({
+      id: r.id,
+      title: r.title,
+      state: r.state,
+      dietary_type: r.dietary_type,
+      calories: r.calories,
+      protein: r.protein,
+      preparation_time: r.preparation_time,
+    })),
+  };
 }
 
 function renderInlineFormatting(text: string) {
@@ -79,7 +149,14 @@ function FormattedMessage({ content }: { content: string }) {
   );
 }
 
+const STARTER_PROMPTS = [
+  'High-protein veg gym dinner',
+  'Healthy breakfast under 350 kcal',
+  'Famous high-protein dishes from Punjab',
+];
+
 export function AIChatbot() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -90,44 +167,60 @@ export function AIChatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessageText = async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: Message = { role: 'user', content: text };
+    const nextHistory = [...messages, userMessage];
+    setMessages(nextHistory);
     setInput('');
     setIsLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('ai-dietician', {
-        body: { 
-          messages: [...messages, userMessage]
-        }
+        body: {
+          messages: nextHistory.map((m) => ({ role: m.role, content: m.content })),
+        },
       });
 
-      if (error) {
-        if (error.message?.includes('429')) {
-          toast.error('Rate limit exceeded. Please try again later.');
-        } else if (error.message?.includes('402')) {
-          toast.error('Service temporarily unavailable. Please add credits to continue.');
-        } else {
-          toast.error('Failed to get response from AI');
-        }
-        console.error('AI error:', error);
+      if (!error && data?.response) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: data.response,
+            sources: Array.isArray(data.sources) ? data.sources : [],
+          },
+        ]);
         return;
       }
 
-      if (data?.response) {
-        const assistantMessage: Message = { role: 'assistant', content: data.response };
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
-    } catch (error) {
-      console.error('Error calling AI:', error);
-      toast.error('Failed to get response from AI');
+      // Client-side RAG fallback if edge function is unreachable
+      const fallback = localRagSearch(text);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: fallback.response,
+          sources: fallback.sources,
+        },
+      ]);
+    } catch {
+      const fallback = localRagSearch(text);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: fallback.response,
+          sources: fallback.sources,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleSend = () => sendMessageText(input);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -151,12 +244,17 @@ export function AIChatbot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-20 right-3 md:bottom-6 md:right-6 w-[calc(100vw-1.5rem)] sm:w-96 h-[500px] max-h-[75vh] md:max-h-[80vh] flex flex-col shadow-warm z-50 transition-smooth">
+        <Card className="fixed bottom-20 right-3 md:bottom-6 md:right-6 w-[calc(100vw-1.5rem)] sm:w-96 h-[520px] max-h-[75vh] md:max-h-[80vh] flex flex-col shadow-warm z-50 transition-smooth">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              <h3 className="font-semibold">AI Dietician</h3>
+              <div>
+                <h3 className="font-semibold leading-none">AI Dietician</h3>
+                <span className="text-[10px] opacity-85 flex items-center gap-1 mt-0.5">
+                  <Sparkles className="h-2.5 w-2.5" /> RAG · Grounded in Zaika Recipes
+                </span>
+              </div>
             </div>
             <Button
               variant="ghost"
@@ -171,26 +269,36 @@ export function AIChatbot() {
           {/* Messages */}
           <ScrollArea className="flex-1 p-4">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground text-sm py-8">
-                <p className="mb-2">👋 Hi! I'm your AI Dietician.</p>
-                <p className="mb-4">I can help you with:</p>
-                <ul className="text-left space-y-1 max-w-xs mx-auto">
-                  <li>• Personalized diet plans</li>
-                  <li>• Nutritional advice</li>
-                  <li>• Meal planning tips</li>
-                  <li>• Ingredient cost estimates</li>
-                </ul>
-                <p className="mt-4 text-xs">Ask me your diet-related questions!</p>
+              <div className="text-center text-muted-foreground text-sm py-4 space-y-4">
+                <div>
+                  <p className="mb-1.5 font-medium text-foreground">👋 Hi! I&apos;m your Zaika AI Dietician.</p>
+                  <p className="text-xs">
+                    Powered by RAG — I search live Zaika recipes &amp; macros to give personalized meal recommendations.
+                  </p>
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Try asking:</p>
+                  {STARTER_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => sendMessageText(prompt)}
+                      className="w-full text-left text-xs px-3 py-2 rounded-lg bg-muted/60 hover:bg-muted text-foreground transition-colors border border-border/50"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
+                    className={`max-w-[85%] rounded-lg p-3 ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted'
@@ -202,6 +310,26 @@ export function AIChatbot() {
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     )}
                   </div>
+
+                  {message.role === 'assistant' && message.sources && message.sources.length > 0 && (
+                    <div className="mt-2 max-w-[90%] flex flex-wrap gap-1.5">
+                      {message.sources.map((src) => (
+                        <button
+                          key={src.id}
+                          type="button"
+                          onClick={() => {
+                            navigate(`/recipe/${src.id}`);
+                            setIsOpen(false);
+                          }}
+                          className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors border border-primary/20"
+                        >
+                          <span className="truncate max-w-[160px]">{src.title}</span>
+                          {src.protein ? <span className="opacity-75">· {src.protein}g P</span> : null}
+                          <ArrowUpRight className="h-3 w-3 shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
               {isLoading && (
@@ -223,12 +351,11 @@ export function AIChatbot() {
           <div className="p-4 border-t">
             <div className="flex gap-2">
               <Input
-                placeholder="Ask about diet and nutrition..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyPress}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask about diet, macros, or recipes..."
                 disabled={isLoading}
-                className="flex-1"
               />
               <Button
                 onClick={handleSend}

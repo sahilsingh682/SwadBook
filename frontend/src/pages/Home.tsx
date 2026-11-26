@@ -68,6 +68,8 @@ export default function Home() {
   // Recipes state
   const [allRecipes, setAllRecipes] = useState<any[]>(FAMOUS_RECIPES);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,10 +103,13 @@ export default function Home() {
         console.warn('Supabase fetch error, using curated database:', error);
         setAllRecipes(FAMOUS_RECIPES);
       } else if (data && data.length > 0) {
-        // Merge Supabase recipes with our verified famous recipes (preventing duplicates)
-        const dbIds = new Set(data.map((r: any) => r.id));
-        const combined = [...data, ...FAMOUS_RECIPES.filter(r => !dbIds.has(r.id))];
-        setAllRecipes(combined);
+        // Deduplicate by normalized title and ID so curated dishes never appear twice
+        const curatedTitles = new Set(FAMOUS_RECIPES.map((r) => r.title.trim().toLowerCase()));
+        const curatedIds = new Set(FAMOUS_RECIPES.map((r) => r.id));
+        const communityOnly = data.filter(
+          (r: any) => !curatedIds.has(r.id) && !curatedTitles.has((r.title || '').trim().toLowerCase())
+        );
+        setAllRecipes([...FAMOUS_RECIPES, ...communityOnly]);
       } else {
         setAllRecipes(FAMOUS_RECIPES);
       }
@@ -119,6 +124,11 @@ export default function Home() {
   useEffect(() => {
     fetchRecipes();
   }, []);
+
+  // Reset to page 1 whenever filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, dietaryFilter, mealTypeFilter, healthFilter, stateFilter, maxPrepTime, sortBy]);
 
   const scrollToRecipes = () => {
     recipesSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -578,13 +588,60 @@ export default function Home() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredRecipes.map((recipe) => (
-                <div key={recipe.id} className="transition-all">
-                  <RecipeCard recipe={recipe} />
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredRecipes
+                  .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                  .map((recipe) => (
+                    <div key={recipe.id} className="transition-all">
+                      <RecipeCard recipe={recipe} />
+                    </div>
+                  ))}
+              </div>
+
+              {filteredRecipes.length > ITEMS_PER_PAGE && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                      document.getElementById('recipes-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Previous
+                  </Button>
+
+                  {Array.from({ length: Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                      className="w-9"
+                      onClick={() => {
+                        setCurrentPage(page);
+                        document.getElementById('recipes-grid')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE)}
+                    onClick={() => {
+                      setCurrentPage((p) => Math.min(Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE), p + 1));
+                      document.getElementById('recipes-grid')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    Next
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </section>

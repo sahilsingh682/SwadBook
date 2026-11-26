@@ -103,11 +103,16 @@ export default function Home() {
         console.warn('Supabase fetch error, using curated database:', error);
         setAllRecipes(FAMOUS_RECIPES);
       } else if (data && data.length > 0) {
-        // Deduplicate by normalized title and ID so curated dishes never appear twice
+        // Keep only community user-submitted recipes from DB; curated 38 dishes come from FAMOUS_RECIPES
+        const MASTER_CHEF_ID = '00000000-0000-0000-0000-000000000001';
         const curatedTitles = new Set(FAMOUS_RECIPES.map((r) => r.title.trim().toLowerCase()));
         const curatedIds = new Set(FAMOUS_RECIPES.map((r) => r.id));
         const communityOnly = data.filter(
-          (r: any) => !curatedIds.has(r.id) && !curatedTitles.has((r.title || '').trim().toLowerCase())
+          (r: any) =>
+            r.author_id !== MASTER_CHEF_ID &&
+            r.profiles?.name !== 'Master Chef Rebel' &&
+            !curatedIds.has(r.id) &&
+            !curatedTitles.has((r.title || '').trim().toLowerCase())
         );
         setAllRecipes([...FAMOUS_RECIPES, ...communityOnly]);
       } else {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zaika-v1';
+const CACHE_NAME = 'zaika-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',
@@ -48,21 +48,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-while-revalidate for static assets (JS, CSS, images, fonts)
+  // Network-first for all same-origin assets so deploys take effect immediately
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        const networkFetch = fetch(request)
-          .then((response) => {
-            if (response && response.status === 200) {
-              const clone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-            }
-            return response;
-          })
-          .catch(() => cached);
-        return cached || networkFetch;
-      })
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
     );
   }
 });

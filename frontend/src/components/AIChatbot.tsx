@@ -32,13 +32,40 @@ interface Message {
 }
 
 const STOP_WORDS = new Set([
-  'tell', 'about', 'recipe', 'make', 'cook', 'how', 'what', 'give', 'show', 'want',
+  'tell', 'about', 'recipe', 'recipes', 'make', 'cook', 'how', 'what', 'give', 'show', 'want',
   'need', 'suggest', 'recommend', 'best', 'good', 'some', 'with', 'from', 'that',
-  'this', 'have', 'for', 'the', 'and', 'can', 'you', 'please', 'dish', 'food', 'meal',
+  'this', 'have', 'for', 'the', 'and', 'can', 'you', 'please', 'dish', 'dishes', 'food', 'meal',
+  'much', 'many', 'does', 'are', 'is', 'in', 'of', 'to', 'me', 'my', 'a', 'an',
 ]);
 
-async function smartRagFallback(query: string): Promise<{ response: string; sources: RecipeSource[] }> {
-  // Fetch live approved recipes from Supabase and merge with curated FAMOUS_RECIPES
+const FOOD_DOMAIN_KEYWORDS = [
+  'recipe', 'recipes', 'dish', 'dishes', 'food', 'meal', 'meals', 'diet', 'nutrition',
+  'protein', 'carb', 'carbs', 'fat', 'fats', 'calorie', 'calories', 'kcal', 'fiber',
+  'macro', 'macros', 'gym', 'workout', 'muscle', 'weight', 'fat loss', 'breakfast',
+  'lunch', 'dinner', 'snack', 'snacks', 'veg', 'vegetarian', 'non-veg', 'vegan',
+  'cook', 'cooking', 'ingredient', 'ingredients', 'eat', 'eating', 'healthy', 'zaika',
+  'punjab', 'maharashtra', 'tamil', 'andhra', 'rajasthan', 'bengal', 'gujarat', 'kashmir',
+  'goa', 'uttar pradesh', 'dal', 'paneer', 'chicken', 'fish', 'mutton', 'dosa', 'idli',
+  'biryani', 'roti', 'pav', 'poha', 'dhokla', 'thepla', 'khichdi', 'kebab', 'curry', 'saag',
+];
+
+const GREETING_REGEX = /^(hi|hello|hey|hii+|heyy+|namaste|hola|good morning|good afternoon|good evening|sup|yo)[\s!?.]*$/i;
+
+async function smartRagResponse(query: string): Promise<{ response: string; sources: RecipeSource[] }> {
+  const trimmed = query.trim();
+  const q = trimmed.toLowerCase();
+
+  // 1. Handle greetings cleanly
+  if (GREETING_REGEX.test(trimmed)) {
+    return {
+      response:
+        `👋 Hello! Welcome to **Zaika**!\n\n` +
+        `Ask me about any dish on Zaika (like *Classic Dal Makhani* or *Amritsari Butter Chicken*), protein & calorie breakdowns, or personalized gym & weight-loss meal plans.`,
+      sources: [],
+    };
+  }
+
+  // 2. Fetch live approved recipes from Supabase and merge with curated FAMOUS_RECIPES
   let pool: RecipeSource[] = FAMOUS_RECIPES.map((r) => ({ ...r }));
   try {
     const { data } = await supabase
@@ -57,7 +84,6 @@ async function smartRagFallback(query: string): Promise<{ response: string; sour
     // use FAMOUS_RECIPES pool
   }
 
-  const q = query.toLowerCase();
   const tokens = q
     .replace(/[^a-z0-9\s-]/g, ' ')
     .split(/\s+/)
@@ -78,10 +104,14 @@ async function smartRagFallback(query: string): Promise<{ response: string; sour
       ...(r.ingredients || []),
     ].join(' ').toLowerCase();
 
+    let titleHits = 0;
     let score = 0;
     for (const token of tokens) {
-      if (titleLower.includes(token)) score += 10;
-      if ((r.state || '').toLowerCase().includes(token)) score += 5;
+      if (titleLower.includes(token)) {
+        score += 12;
+        titleHits++;
+      }
+      if ((r.state || '').toLowerCase().includes(token)) score += 6;
       if ((r.tags || []).some((t) => t.includes(token))) score += 4;
       if (haystack.includes(token)) score += 2;
     }
@@ -94,15 +124,25 @@ async function smartRagFallback(query: string): Promise<{ response: string; sour
     if (q.includes('dinner') && r.meal_type === 'dinner') score += 4;
     if (q.includes('snack') && r.meal_type === 'snacks') score += 4;
 
-    return { r, score };
+    return { r, score, titleHits };
   }).sort((a, b) => b.score - a.score);
 
   const best = scored[0];
-  const isSpecificRecipeQuery =
-    best && best.score >= 10 && (q.includes('recipe') || q.includes('how to') || q.includes('about') || q.includes('ingredients') || q.includes('steps') || q.includes('calories') || q.includes('protein in'));
+  const hasDomainKeyword = FOOD_DOMAIN_KEYWORDS.some((kw) => q.includes(kw));
+  const hasAnyRecipeMatch = best && best.score > 0;
 
-  // If the user asked about a specific dish (e.g. "Classic Dal Makhani"), return full details!
-  if (isSpecificRecipeQuery) {
+  // 3. Off-topic guard: if query is unrelated to Zaika recipes, food, diet, or nutrition
+  if (!hasDomainKeyword && !hasAnyRecipeMatch) {
+    return {
+      response:
+        `I'm your **Zaika AI Dietician**! 🥗\n\n` +
+        `I can only help with questions related to **Zaika recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
+      sources: [],
+    };
+  }
+
+  // 4. Specific recipe match (user named a dish or asked about its recipe/macros)
+  if (best && (best.titleHits >= 2 || best.score >= 14)) {
     const r = best.r;
     const ingredientsList = (r.ingredients || []).map((ing) => `- ${ing}`).join('\n');
     const stepsList = (r.steps || []).map((st, idx) => `${idx + 1}. ${st}`).join('\n');
@@ -119,17 +159,24 @@ async function smartRagFallback(query: string): Promise<{ response: string; sour
     return { response, sources: [r] };
   }
 
-  // Otherwise return top 3 matching Zaika dishes for the diet/filter query
+  // 5. Diet, protein, or multi-recipe recommendation query
   const top = (scored.some((s) => s.score > 0) ? scored.filter((s) => s.score > 0) : scored)
     .slice(0, 3)
     .map((s) => s.r);
+
+  let intro = `### 🥗 Zaika Recommendations\n`;
+  if (q.includes('protein') || q.includes('gym') || q.includes('muscle')) {
+    intro = `### 💪 High-Protein & Gym Diet Picks from Zaika\n`;
+  } else if (q.includes('weight loss') || q.includes('fat loss') || q.includes('low cal')) {
+    intro = `### 🎯 Light & Balanced Picks from Zaika\n`;
+  }
 
   const lines = top.map(
     (r) => `- **${r.title}** (${r.state || 'Regional'} · ${r.dietary_type || 'veg'}): **${r.calories ?? '—'} kcal**, **${r.protein ?? '—'}g protein**, ${r.preparation_time || 30} min`
   );
 
   return {
-    response: `### 🥗 Zaika Recommendations\n${lines.join('\n')}\n\nTap any recipe chip below to open full ingredients and cooking steps!`,
+    response: `${intro}${lines.join('\n')}\n\nTap any recipe chip below to open full ingredients and cooking steps!`,
     sources: top,
   };
 }
@@ -236,7 +283,7 @@ export function AIChatbot() {
       });
 
       // Only accept Edge Function response if it's from the updated RAG deployment (rag_enabled: true)
-      if (!error && data?.response && data?.rag_enabled) {
+      if (!error && data?.response && data?.rag_enabled === true) {
         setMessages((prev) => [
           ...prev,
           {
@@ -249,7 +296,7 @@ export function AIChatbot() {
       }
 
       // Run full Hybrid RAG directly over live Supabase + Zaika dataset
-      const ragResult = await smartRagFallback(text);
+      const ragResult = await smartRagResponse(text);
       setMessages((prev) => [
         ...prev,
         {
@@ -259,7 +306,7 @@ export function AIChatbot() {
         },
       ]);
     } catch {
-      const ragResult = await smartRagFallback(text);
+      const ragResult = await smartRagResponse(text);
       setMessages((prev) => [
         ...prev,
         {

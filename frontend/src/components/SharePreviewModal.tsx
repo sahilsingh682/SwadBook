@@ -80,7 +80,7 @@ export default function SharePreviewModal({ open, onOpenChange, recipe }: ShareP
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              reciperebel.lovable.app • by {recipe.profiles?.name || 'Anonymous Chef'}
+              reciperebel.vercel.app • by {recipe.profiles?.name || 'Anonymous Chef'}
             </p>
           </div>
         </div>

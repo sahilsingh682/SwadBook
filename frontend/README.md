@@ -40,8 +40,7 @@ frontend/
 │   │   ├── use-mobile.tsx      # Mobile viewport detection
 │   │   └── use-toast.ts        # Toast dispatchers
 │   ├── integrations/           # Backend SDK client singletons
-│   │   ├── supabase/           # Supabase client, types, preview auth
-│   │   └── lovable/            # Lovable OAuth wrapper
+│   │   └── supabase/           # Supabase client, types, auth storage
 │   ├── lib/                    # Utilities, validation schemas, AuthContext
 │   │   ├── auth.tsx            # Full auth context (session, user, admin role, suspension state)
 │   │   ├── utils.ts            # Tailwind class merging (cn utility)

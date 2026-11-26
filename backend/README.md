@@ -23,7 +23,7 @@ backend/
     ├── consolidated_migration.sql      # Complete single-run SQL migration script
     ├── seed_recipes.sql                # Seed data script with System Master Chef & dishes
     ├── functions/
-    │   └── ai-dietician/               # Deno Edge Function with Gemini & Lovable AI support
+    │   └── ai-dietician/               # Deno Edge Function with Google Gemini AI support
     │       └── index.ts
     └── migrations/                     # Chronological SQL migrations (1 through 8)
         ├── 20251202093109_*.sql        # Initial schema, tables, RLS, triggers & storage
@@ -96,13 +96,11 @@ All tables have RLS enabled:
 The `ai-dietician` function provides diet advice, recipe recommendations, and meal planning assistance.
 
 - **Path**: `backend/supabase/functions/ai-dietician/index.ts`
-- **Dual Engine Architecture**:
+- **Engine Architecture**:
   1. **Google Gemini API**: Direct connection to `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent` using `GEMINI_API_KEY`.
-  2. **Lovable AI Gateway**: Fallback connection to `https://ai.gateway.lovable.dev/v1/chat/completions` using `LOVABLE_API_KEY`.
-  3. **High-Availability Engine**: If neither API key is configured yet, the function returns an intelligent nutritional advice calculation, preventing client 500 errors.
+  2. **High-Availability Engine**: If no API key is configured yet, the function returns an intelligent nutritional advice calculation, preventing client 500 errors.
 - **Environment Secrets**:
   - `GEMINI_API_KEY`: Google Gemini API Key (Recommended)
-  - `LOVABLE_API_KEY`: Lovable AI Gateway Key (Optional)
 
 ### Setting Secrets & Deploying
 ```bash

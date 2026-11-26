@@ -35,7 +35,6 @@ serve(async (req) => {
     const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || '';
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     const systemPrompt = `You are an expert Dietician and Culinary Nutritionist for Recipe Rebel.
 Your role is to provide accurate, empowering advice on nutrition, healthy eating, gym diets, macronutrients (protein, carbs, fat, calories), regional Indian cuisines, and recipe substitutions.
@@ -90,43 +89,7 @@ STRICT GUIDELINES:
     }
 
     // -------------------------------------------------------------
-    // OPTION 2: Lovable AI Gateway (if LOVABLE_API_KEY is set)
-    // -------------------------------------------------------------
-    if (LOVABLE_API_KEY) {
-      try {
-        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              ...messages
-            ],
-            temperature: 0.7,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const aiResponse = data.choices?.[0]?.message?.content;
-          if (aiResponse) {
-            return new Response(
-              JSON.stringify({ response: aiResponse }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-        }
-      } catch (err) {
-        console.error('Lovable AI gateway error:', err);
-      }
-    }
-
-    // -------------------------------------------------------------
-    // OPTION 3: Built-in Intelligent Fallback Nutrition Engine
+    // OPTION 2: Built-in Intelligent Fallback Nutrition Engine
     // (Ensures the chatbot always works reliably without 500 errors)
     // -------------------------------------------------------------
     const lower = lastUserMessage.toLowerCase();

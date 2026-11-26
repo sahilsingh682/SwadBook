@@ -13,6 +13,7 @@ import SharePreviewModal from '@/components/SharePreviewModal';
 import { Share2 } from 'lucide-react';
 import { AuthPromptDialog, AuthPromptAction } from '@/components/AuthPromptDialog';
 import { FAMOUS_RECIPES } from '@/data/famousRecipes';
+import { shareToWhatsApp, shareToTwitter, copyToClipboard } from '@/lib/share';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -341,24 +342,15 @@ export default function RecipeDetail() {
   };
 
   const handleShareWhatsApp = () => {
-    const url = window.location.href;
-    const text = `Check out this recipe: ${recipe?.title}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
+    shareToWhatsApp(recipe?.title || 'Zaika Recipe');
   };
 
   const handleShareTwitter = () => {
-    const url = window.location.href;
-    const text = `Check out this recipe: ${recipe?.title}`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    shareToTwitter(recipe?.title || 'Zaika Recipe');
   };
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
-    } catch {
-      toast.error('Failed to copy link');
-    }
+  const handleCopyLink = () => {
+    copyToClipboard(window.location.href);
   };
 
   const canEditDelete = user && (user.id === recipe?.author_id || isAdmin);

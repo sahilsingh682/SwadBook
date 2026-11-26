@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, Clock, Link2, Twitter, Eye } from 'lucide-react';
-import { toast } from 'sonner';
+import { shareToWhatsApp, shareToTwitter, copyToClipboard } from '@/lib/share';
 
 interface SharePreviewModalProps {
   open: boolean;
@@ -21,24 +21,10 @@ export default function SharePreviewModal({ open, onOpenChange, recipe }: ShareP
   if (!recipe) return null;
 
   const url = window.location.href;
-  const text = `Check out this recipe: ${recipe.title}`;
 
-  const handleWhatsApp = () => {
-    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
-  };
-
-  const handleTwitter = () => {
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success('Link copied to clipboard!');
-    } catch {
-      toast.error('Failed to copy link');
-    }
-  };
+  const handleWhatsApp = () => shareToWhatsApp(recipe.title, url);
+  const handleTwitter = () => shareToTwitter(recipe.title, url);
+  const handleCopy = () => copyToClipboard(url);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,7 +66,7 @@ export default function SharePreviewModal({ open, onOpenChange, recipe }: ShareP
               )}
             </div>
             <p className="text-xs text-muted-foreground truncate">
-              reciperebel.vercel.app • by {recipe.profiles?.name || 'Anonymous Chef'}
+              {window.location.host || 'reciperebel.vercel.app'} • by {recipe.profiles?.name || 'Zaika Chef'}
             </p>
           </div>
         </div>

@@ -35,8 +35,16 @@ const STOP_WORDS = new Set([
   'tell', 'about', 'recipe', 'recipes', 'make', 'cook', 'how', 'what', 'give', 'show', 'want',
   'need', 'suggest', 'recommend', 'best', 'good', 'some', 'with', 'from', 'that',
   'this', 'have', 'for', 'the', 'and', 'can', 'you', 'please', 'dish', 'dishes', 'food', 'meal',
-  'much', 'many', 'does', 'are', 'is', 'in', 'of', 'to', 'me', 'my', 'a', 'an',
+  'much', 'many', 'does', 'are', 'is', 'in', 'of', 'to', 'me', 'my', 'a', 'an', 'who', 'where',
+  'when', 'why', 'which', 'india', 'indian',
 ]);
+
+const OFF_TOPIC_KEYWORDS = [
+  'minister', 'president', 'prime minister', 'pm', 'politics', 'election', 'government',
+  'parliament', 'cricket', 'football', 'movie', 'actor', 'actress', 'song', 'weather',
+  'capital', 'population', 'programming', 'coding', 'javascript', 'python', 'html', 'css',
+  'stock', 'crypto', 'bitcoin', 'homework', 'exam', 'history', 'war', 'news',
+];
 
 const FOOD_DOMAIN_KEYWORDS = [
   'recipe', 'recipes', 'dish', 'dishes', 'food', 'meal', 'meals', 'diet', 'nutrition',
@@ -61,6 +69,18 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
       response:
         `👋 Hello! Welcome to **Zaika**!\n\n` +
         `Ask me about any dish on Zaika (like *Classic Dal Makhani* or *Amritsari Butter Chicken*), protein & calorie breakdowns, or personalized gym & weight-loss meal plans.`,
+      sources: [],
+    };
+  }
+
+  // 2. Explicit off-topic check (politics, trivia, coding, etc.)
+  const hasDomainKeyword = FOOD_DOMAIN_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
+  const hasOffTopicKeyword = OFF_TOPIC_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
+  if (hasOffTopicKeyword && !hasDomainKeyword) {
+    return {
+      response:
+        `I'm your **Zaika AI Dietician**! 🥗\n\n` +
+        `I can only help with questions related to **Zaika recipes**, **regional Indian dishes**, **protein & calorie macros**, and **diet or fitness meal plans**. Please ask something about food or nutrition!`,
       sources: [],
     };
   }
@@ -107,13 +127,14 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
     let titleHits = 0;
     let score = 0;
     for (const token of tokens) {
-      if (titleLower.includes(token)) {
+      const wordRegex = new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      if (wordRegex.test(titleLower)) {
         score += 12;
         titleHits++;
       }
-      if ((r.state || '').toLowerCase().includes(token)) score += 6;
+      if (wordRegex.test(r.state || '')) score += 6;
       if ((r.tags || []).some((t) => t.includes(token))) score += 4;
-      if (haystack.includes(token)) score += 2;
+      if (wordRegex.test(haystack)) score += 2;
     }
     if (wantVeg && r.dietary_type === 'vegetarian') score += 3;
     if (wantNonVeg && r.dietary_type === 'non-vegetarian') score += 3;
@@ -128,7 +149,6 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
   }).sort((a, b) => b.score - a.score);
 
   const best = scored[0];
-  const hasDomainKeyword = FOOD_DOMAIN_KEYWORDS.some((kw) => q.includes(kw));
   const hasAnyRecipeMatch = best && best.score > 0;
 
   // 3. Off-topic guard: if query is unrelated to Zaika recipes, food, diet, or nutrition

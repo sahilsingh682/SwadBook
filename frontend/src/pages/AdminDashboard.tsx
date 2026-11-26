@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { FAMOUS_RECIPES } from '@/data/famousRecipes';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -73,6 +74,7 @@ interface Recipe {
   profiles: {
     name: string;
   } | null;
+  isCuratedOnly?: boolean;
 }
 
 interface UserProfile {
@@ -139,7 +141,28 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRecipes((data as unknown as Recipe[]) || []);
+      const dbRecipes = ((data as unknown as Recipe[]) || []).map((r) => ({ ...r, isCuratedOnly: false }));
+      const dbTitles = new Set(dbRecipes.map((r) => r.title.trim().toLowerCase()));
+      const missingCurated: Recipe[] = FAMOUS_RECIPES.filter(
+        (f) => !dbTitles.has(f.title.trim().toLowerCase())
+      ).map((f) => ({
+        id: f.id,
+        title: f.title,
+        ingredients: f.ingredients,
+        preparation_time: f.preparation_time,
+        image_url: f.image_url,
+        author_id: user?.id || '',
+        status: 'approved',
+        created_at: new Date().toISOString(),
+        meal_type: f.meal_type,
+        calories: f.calories,
+        protein: f.protein,
+        carbs: f.carbs,
+        fat: f.fat,
+        profiles: f.profiles,
+        isCuratedOnly: true,
+      }));
+      setRecipes([...dbRecipes, ...missingCurated]);
     } catch (error) {
       console.error('Error fetching recipes:', error);
       toast.error('Failed to load recipes for moderation');
@@ -198,6 +221,48 @@ export default function AdminDashboard() {
   // -------------------------------------------------------------
   // Recipe Moderation Actions
   // -------------------------------------------------------------
+  const handleSyncCuratedToDb = async () => {
+    if (!user) return;
+    const toInsert = recipes.filter((r) => r.isCuratedOnly);
+    if (toInsert.length === 0) return;
+
+    setActionLoading(true);
+    try {
+      const payload = FAMOUS_RECIPES.filter((f) =>
+        toInsert.some((t) => t.id === f.id)
+      ).map((f) => ({
+        title: f.title,
+        description: f.description,
+        state: f.state,
+        dietary_type: f.dietary_type,
+        meal_type: f.meal_type,
+        tags: f.tags,
+        preparation_time: f.preparation_time,
+        calories: f.calories,
+        protein: f.protein,
+        carbs: f.carbs,
+        fat: f.fat,
+        average_rating: f.average_rating,
+        image_url: f.image_url,
+        author_id: user.id,
+        status: 'approved' as const,
+        ingredients: f.ingredients,
+        steps: f.steps,
+      }));
+
+      const { error } = await supabase.from('recipes').insert(payload);
+      if (error) throw error;
+
+      toast.success(`Synced ${payload.length} curated recipes to database!`);
+      await fetchRecipes();
+    } catch (error: any) {
+      console.error('Error syncing curated recipes:', error);
+      toast.error(error?.message || 'Failed to sync recipes to database');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleModerateRecipe = async (recipeId: string, status: 'approved' | 'rejected') => {
     try {
       const { error } = await supabase
@@ -733,49 +798,64 @@ export default function AdminDashboard() {
                           <span>View</span>
                         </Button>
 
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
-                          className="h-9 gap-1.5"
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span>Edit</span>
-                        </Button>
-
-                        {recipe.status !== 'approved' && (
+                        {recipe.isCuratedOnly ? (
                           <Button
                             size="sm"
-                            onClick={() => handleModerateRecipe(recipe.id, 'approved')}
-                            className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm"
-                          >
-                            <Check className="h-4 w-4" />
-                            <span>Approve</span>
-                          </Button>
-                        )}
-
-                        {recipe.status !== 'rejected' && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleModerateRecipe(recipe.id, 'rejected')}
+                            variant="secondary"
+                            onClick={handleSyncCuratedToDb}
+                            disabled={actionLoading}
                             className="h-9 gap-1.5"
                           >
-                            <X className="h-4 w-4" />
-                            <span>Reject</span>
+                            <RefreshCw className={`h-3.5 w-3.5 ${actionLoading ? 'animate-spin' : ''}`} />
+                            <span>Sync to DB to Edit/Delete</span>
                           </Button>
-                        )}
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
+                              className="h-9 gap-1.5"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span>Edit</span>
+                            </Button>
 
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setDeleteRecipeId(recipe.id)}
-                          className="h-9 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          title="Delete Recipe"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span>Delete</span>
-                        </Button>
+                            {recipe.status !== 'approved' && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleModerateRecipe(recipe.id, 'approved')}
+                                className="h-9 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm"
+                              >
+                                <Check className="h-4 w-4" />
+                                <span>Approve</span>
+                              </Button>
+                            )}
+
+                            {recipe.status !== 'rejected' && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleModerateRecipe(recipe.id, 'rejected')}
+                                className="h-9 gap-1.5"
+                              >
+                                <X className="h-4 w-4" />
+                                <span>Reject</span>
+                              </Button>
+                            )}
+
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setDeleteRecipeId(recipe.id)}
+                              className="h-9 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              title="Delete Recipe"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Delete</span>
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

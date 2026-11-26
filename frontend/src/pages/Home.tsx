@@ -220,27 +220,27 @@ export default function Home() {
       {/* ======================================================== */}
       {/* 1. HERO SECTION */}
       {/* ======================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-card via-background to-background pt-8 pb-16 md:py-24 border-b">
+      <section className="relative overflow-hidden bg-gradient-to-b from-card via-background to-background pt-5 pb-10 md:py-24 border-b">
         <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 15% 30%, hsl(24 95% 53% / 0.35), transparent 45%), radial-gradient(circle at 85% 60%, hsl(38 92% 50% / 0.25), transparent 45%)'
         }} />
 
         <div className="container mx-auto px-4 relative z-10 max-w-7xl">
-          <div className="grid lg:grid-cols-12 gap-12 items-center">
+          <div className="grid lg:grid-cols-12 gap-7 lg:gap-12 items-center">
             {/* Left Column: Headline & Value Prop */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/10 text-primary text-[11px] sm:text-xs font-semibold tracking-wide uppercase">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Famous Indian Regional Cuisine & AI Nutrition</span>
               </div>
 
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] text-foreground">
+              <h1 className="text-3xl sm:text-5xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] text-foreground">
                 Taste India.<br />
                 <span className="text-primary">Share Recipes.</span>
               </h1>
 
-              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                Discover iconic dishes from Punjab, Maharashtra, Tamil Nadu, Bengal, and across India. Filter by <strong>Gym Diet</strong>, <strong>High Protein</strong>, or <strong>High Fiber</strong> with 100% verified photography and exact macro breakdowns.
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                Discover iconic dishes from Punjab, Maharashtra, Tamil Nadu, Bengal, and across India. Filter by <strong>Gym Diet</strong>, <strong>High Protein</strong>, or <strong>High Fiber</strong> with verified photos and exact macros.
               </p>
 
               {/* Action Buttons */}
@@ -377,17 +377,17 @@ export default function Home() {
           {/* ======================================================== */}
           {/* FILTER CONTROL CENTER */}
           {/* ======================================================== */}
-          <div className="bg-card border rounded-2xl p-5 shadow-card mb-8 space-y-4">
+          <div className="bg-card border rounded-2xl p-3.5 sm:p-5 shadow-card mb-6 sm:mb-8 space-y-3 sm:space-y-4">
             {/* Row 1: Search Bar + State Dropdown + Vegetarian Toggle */}
-            <div className="flex flex-col lg:flex-row gap-3">
+            <div className="flex flex-col lg:flex-row gap-2.5 sm:gap-3">
               {/* Search input */}
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by dish name, state (e.g. Punjab, Maharashtra), or ingredients..."
+                  placeholder="Search dish, state, or ingredients..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-muted/30 border-border/70"
+                  className="pl-10 h-10 sm:h-11 bg-muted/30 border-border/70 text-sm"
                 />
                 {searchQuery && (
                   <button
@@ -399,23 +399,36 @@ export default function Home() {
                 )}
               </div>
 
-              {/* State Filter */}
-              <Select value={stateFilter} onValueChange={setStateFilter}>
-                <SelectTrigger className="w-full lg:w-[200px] h-11 bg-muted/30 font-medium">
-                  <MapPin className="h-4 w-4 text-primary mr-1 flex-shrink-0" />
-                  <SelectValue placeholder="Select State" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDIAN_STATES.map((st) => (
-                    <SelectItem key={st} value={st}>
-                      {st}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-[1fr_auto] lg:flex gap-2">
+                {/* State Filter */}
+                <Select value={stateFilter} onValueChange={setStateFilter}>
+                  <SelectTrigger className="w-full lg:w-[200px] h-10 sm:h-11 bg-muted/30 font-medium text-sm">
+                    <MapPin className="h-4 w-4 text-primary mr-1 flex-shrink-0" />
+                    <SelectValue placeholder="Select State" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDIAN_STATES.map((st) => (
+                      <SelectItem key={st} value={st}>
+                        {st}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Filter Drawer Toggle */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`h-10 w-10 sm:h-11 sm:w-11 shrink-0 ${showFilters ? 'bg-primary/10 border-primary/40 text-primary' : ''}`}
+                  title="Toggle Advanced Prep Time Filter"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                </Button>
+              </div>
 
               {/* Dietary Toggle (All / Vegetarian / Non-Vegetarian) */}
-              <div className="flex p-1 bg-muted/60 rounded-xl items-center border self-start lg:self-auto w-full sm:w-auto">
+              <div className="flex p-1 bg-muted/60 rounded-xl items-center border w-full lg:w-auto">
                 <button
                   onClick={() => setDietaryFilter('all')}
                   className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-smooth ${
@@ -450,24 +463,14 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Filter Drawer Toggle */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`h-11 w-11 ${showFilters ? 'bg-primary/10 border-primary/40 text-primary' : ''}`}
-                title="Toggle Advanced Prep Time Filter"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-              </Button>
             </div>
 
-            {/* Row 2: Health & Fitness Category Pills */}
-            <div className="space-y-1.5 pt-1">
+            {/* Row 2: Health & Fitness Category Pills (horizontally scrollable on mobile) */}
+            <div className="space-y-1.5 pt-0.5">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Health & Fitness Categories
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex overflow-x-auto pb-1 gap-2 sm:flex-wrap">
                 {HEALTH_GOALS.map((goal) => {
                   const Icon = goal.icon;
                   const isActive = healthFilter === goal.id;
@@ -475,7 +478,7 @@ export default function Home() {
                     <button
                       key={goal.id}
                       onClick={() => setHealthFilter(goal.id)}
-                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-smooth border ${
+                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-smooth border ${
                         isActive
                           ? 'bg-primary text-primary-foreground border-primary shadow-sm'
                           : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
@@ -489,12 +492,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Row 3: Meal Type Pills */}
-            <div className="space-y-1.5 pt-1">
+            {/* Row 3: Meal Type Pills (horizontally scrollable on mobile) */}
+            <div className="space-y-1.5 pt-0.5">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Meal Type
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex overflow-x-auto pb-1 gap-2 sm:flex-wrap">
                 {[
                   { id: 'all', label: 'All Meals' },
                   { id: 'breakfast', label: 'Breakfast' },
@@ -505,7 +508,7 @@ export default function Home() {
                   <button
                     key={meal.id}
                     onClick={() => setMealTypeFilter(meal.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-smooth border ${
+                    className={`shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-smooth border ${
                       mealTypeFilter === meal.id
                         ? 'bg-foreground text-background border-foreground font-semibold shadow-sm'
                         : 'bg-muted/40 text-muted-foreground border-transparent hover:text-foreground'

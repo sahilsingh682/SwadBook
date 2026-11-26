@@ -96,7 +96,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         onClick={() => navigate(`/recipe/${recipe.id}`)}
       >
         {/* Image Container */}
-        <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+        <div className="aspect-[16/10] sm:aspect-[4/3] relative overflow-hidden bg-muted">
           {recipe.image_url ? (
             <img
               src={recipe.image_url}
@@ -166,9 +166,9 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-5 flex flex-col flex-1 space-y-2.5">
+        <div className="p-3.5 sm:p-5 flex flex-col flex-1 space-y-2 sm:space-y-2.5">
           <div>
-            <h3 className="font-display font-semibold text-lg line-clamp-1 group-hover:text-primary transition-smooth">
+            <h3 className="font-display font-semibold text-base sm:text-lg line-clamp-1 group-hover:text-primary transition-smooth">
               {recipe.title}
             </h3>
             {recipe.description && (

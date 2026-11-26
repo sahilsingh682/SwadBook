@@ -39,15 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .maybeSingle(),
         supabase
           .from('profiles')
-          .select('status, suspension_reason')
+          .select('status, suspension_reason, suspended_until')
           .eq('id', userId)
           .maybeSingle(),
       ]);
 
       setIsAdmin(!!roleRes.data);
-      if (profileRes.data && profileRes.data.status === 'suspended') {
-        setIsSuspended(true);
-        setSuspensionReason(profileRes.data.suspension_reason || 'Platform policy violation');
+      const profile = profileRes.data;
+      if (profile && (profile.status === 'suspended' || profile.status === 'banned')) {
+        // Automatically reinstate if a timed ban has expired
+        if (profile.suspended_until && new Date(profile.suspended_until) <= new Date()) {
+          await supabase
+            .from('profiles')
+            .update({ status: 'active', suspension_reason: null, suspended_until: null })
+            .eq('id', userId);
+          setIsSuspended(false);
+          setSuspensionReason(null);
+        } else {
+          setIsSuspended(true);
+          const expiryNote = profile.suspended_until
+            ? ` (Ban active until ${new Date(profile.suspended_until).toLocaleString()})`
+            : ' (Permanent Ban)';
+          setSuspensionReason((profile.suspension_reason || 'Platform policy violation') + expiryNote);
+        }
       } else {
         setIsSuspended(false);
         setSuspensionReason(null);

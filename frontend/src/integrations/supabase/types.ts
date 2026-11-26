@@ -95,6 +95,7 @@ export type Database = {
           id: string
           name: string
           status: string
+          suspended_until: string | null
           suspension_reason: string | null
           updated_at: string
         }
@@ -103,6 +104,7 @@ export type Database = {
           id: string
           name: string
           status?: string
+          suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
         }
@@ -111,6 +113,7 @@ export type Database = {
           id?: string
           name?: string
           status?: string
+          suspended_until?: string | null
           suspension_reason?: string | null
           updated_at?: string
         }

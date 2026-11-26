@@ -80,6 +80,7 @@ interface UserProfile {
   name: string;
   status: 'active' | 'suspended' | 'banned';
   suspension_reason: string | null;
+  suspended_until: string | null;
   created_at: string;
   role: 'admin' | 'user';
   recipes_count?: number;
@@ -94,9 +95,9 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // State: Recipe Filters
+  // State: Recipe Filters (default to 'all' so admin can edit/delete any recipe immediately)
   const [recipeSearch, setRecipeSearch] = useState('');
-  const [recipeStatusFilter, setRecipeStatusFilter] = useState<string>('pending');
+  const [recipeStatusFilter, setRecipeStatusFilter] = useState<string>('all');
   const [recipeMealFilter, setRecipeMealFilter] = useState<string>('all');
 
   // State: User Filters
@@ -108,6 +109,7 @@ export default function AdminDashboard() {
   const [suspendModalOpen, setSuspendModalOpen] = useState(false);
   const [selectedUserForSuspend, setSelectedUserForSuspend] = useState<UserProfile | null>(null);
   const [suspensionReason, setSuspensionReason] = useState('');
+  const [banDuration, setBanDuration] = useState<'24h' | '3d' | '7d' | '30d' | 'permanent'>('7d');
   const [actionLoading, setActionLoading] = useState(false);
 
   const [deleteRecipeId, setDeleteRecipeId] = useState<string | null>(null);
@@ -180,6 +182,7 @@ export default function AdminDashboard() {
         name: p.name,
         status: (p.status as 'active' | 'suspended' | 'banned') || 'active',
         suspension_reason: p.suspension_reason || null,
+        suspended_until: p.suspended_until || null,
         created_at: p.created_at,
         role: roleMap.get(p.id) || 'user',
         recipes_count: countMap.get(p.id) || 0,
@@ -243,6 +246,7 @@ export default function AdminDashboard() {
   const openSuspendDialog = (userItem: UserProfile) => {
     setSelectedUserForSuspend(userItem);
     setSuspensionReason(userItem.suspension_reason || '');
+    setBanDuration('7d');
     setSuspendModalOpen(true);
   };
 
@@ -251,28 +255,45 @@ export default function AdminDashboard() {
     setActionLoading(true);
     try {
       const reason = suspensionReason.trim() || 'Violation of platform community guidelines';
+      const durationMsMap: Record<string, number> = {
+        '24h': 24 * 60 * 60 * 1000,
+        '3d': 3 * 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
+        '30d': 30 * 24 * 60 * 60 * 1000,
+      };
+      const suspendedUntil =
+        banDuration === 'permanent'
+          ? null
+          : new Date(Date.now() + durationMsMap[banDuration]).toISOString();
+      const nextStatus: 'suspended' | 'banned' = banDuration === 'permanent' ? 'banned' : 'suspended';
+
       const { error } = await supabase
         .from('profiles')
         .update({
-          status: 'suspended',
+          status: nextStatus,
           suspension_reason: reason,
+          suspended_until: suspendedUntil,
         })
         .eq('id', selectedUserForSuspend.id);
 
       if (error) throw error;
 
-      toast.success(`Account for ${selectedUserForSuspend.name} has been placed on HOLD`);
+      toast.success(
+        banDuration === 'permanent'
+          ? `${selectedUserForSuspend.name} has been permanently banned`
+          : `${selectedUserForSuspend.name} banned for ${banDuration}`
+      );
       setUsers((prev) =>
         prev.map((u) =>
           u.id === selectedUserForSuspend.id
-            ? { ...u, status: 'suspended', suspension_reason: reason }
+            ? { ...u, status: nextStatus, suspension_reason: reason, suspended_until: suspendedUntil }
             : u
         )
       );
       setSuspendModalOpen(false);
     } catch (error) {
-      console.error('Error placing user on hold:', error);
-      toast.error('Failed to place account on hold');
+      console.error('Error banning/suspending user:', error);
+      toast.error('Failed to ban account');
     } finally {
       setActionLoading(false);
     }
@@ -285,6 +306,7 @@ export default function AdminDashboard() {
         .update({
           status: 'active',
           suspension_reason: null,
+          suspended_until: null,
         })
         .eq('id', userItem.id);
 
@@ -293,7 +315,9 @@ export default function AdminDashboard() {
       toast.success(`Account for ${userItem.name} has been REINSTATED`);
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === userItem.id ? { ...u, status: 'active', suspension_reason: null } : u
+          u.id === userItem.id
+            ? { ...u, status: 'active', suspension_reason: null, suspended_until: null }
+            : u
         )
       );
     } catch (error) {
@@ -711,9 +735,9 @@ export default function AdminDashboard() {
 
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="outline"
                           onClick={() => navigate(`/recipe/${recipe.id}/edit`)}
-                          className="h-9 gap-1.5 text-muted-foreground hover:text-foreground"
+                          className="h-9 gap-1.5"
                         >
                           <Pencil className="h-4 w-4" />
                           <span>Edit</span>
@@ -746,10 +770,11 @@ export default function AdminDashboard() {
                           size="sm"
                           variant="ghost"
                           onClick={() => setDeleteRecipeId(recipe.id)}
-                          className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
+                          className="h-9 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete Recipe"
                         >
                           <Trash2 className="h-4 w-4" />
+                          <span>Delete</span>
                         </Button>
                       </div>
                     </div>
@@ -829,7 +854,7 @@ export default function AdminDashboard() {
                 <div className="divide-y border rounded-xl overflow-hidden bg-card">
                   {filteredUsers.map((userItem) => {
                     const isSelf = userItem.id === user.id;
-                    const isSuspended = userItem.status === 'suspended';
+                    const isSuspended = userItem.status === 'suspended' || userItem.status === 'banned';
 
                     return (
                       <div
@@ -874,7 +899,11 @@ export default function AdminDashboard() {
                               {isSuspended ? (
                                 <Badge variant="destructive" className="text-xs gap-1 font-medium">
                                   <AlertTriangle className="h-3 w-3" />
-                                  Account On Hold
+                                  {userItem.status === 'banned'
+                                    ? 'Permanent Ban'
+                                    : userItem.suspended_until
+                                      ? `Banned until ${new Date(userItem.suspended_until).toLocaleDateString()}`
+                                      : 'Account On Hold'}
                                 </Badge>
                               ) : (
                                 <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs">
@@ -929,7 +958,7 @@ export default function AdminDashboard() {
                                   className="h-9 gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                                 >
                                   <UserX className="h-4 w-4" />
-                                  <span>Hold Account</span>
+                                  <span>Ban / Hold</span>
                                 </Button>
                               )}
 
@@ -976,26 +1005,47 @@ export default function AdminDashboard() {
               <ShieldAlert className="h-6 w-6" />
             </div>
             <DialogTitle className="text-center font-display text-xl font-bold">
-              Place Account On Hold
+              Ban or Hold Account
             </DialogTitle>
             <DialogDescription className="text-center text-sm">
-              Temporarily restrict <strong>{selectedUserForSuspend?.name}</strong> from uploading recipes, rating dishes, and posting comments.
+              Restrict <strong>{selectedUserForSuspend?.name}</strong> from uploading recipes, rating dishes, and posting comments for a specific duration.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-2">
-            <Label htmlFor="suspension-reason" className="text-sm font-medium">
-              Reason for Violation / Hold
-            </Label>
-            <Input
-              id="suspension-reason"
-              placeholder="e.g. Uploaded spam recipes, abusive comments..."
-              value={suspensionReason}
-              onChange={(e) => setSuspensionReason(e.target.value)}
-              className="h-10"
-            />
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Ban Duration</Label>
+              <Select
+                value={banDuration}
+                onValueChange={(val: '24h' | '3d' | '7d' | '30d' | 'permanent') => setBanDuration(val)}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24h">24 Hours (1 Day)</SelectItem>
+                  <SelectItem value="3d">3 Days</SelectItem>
+                  <SelectItem value="7d">7 Days (1 Week)</SelectItem>
+                  <SelectItem value="30d">30 Days (1 Month)</SelectItem>
+                  <SelectItem value="permanent">Permanent Ban</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="suspension-reason" className="text-sm font-medium">
+                Reason for Violation / Ban
+              </Label>
+              <Input
+                id="suspension-reason"
+                placeholder="e.g. Uploaded wrong/spam recipes, policy violation..."
+                value={suspensionReason}
+                onChange={(e) => setSuspensionReason(e.target.value)}
+                className="h-10"
+              />
+            </div>
             <p className="text-xs text-muted-foreground">
-              This note will be visible in the admin audit log and displayed to the user when they attempt to perform restricted actions.
+              This reason and expiry date will be shown to the user whenever they attempt restricted actions, and timed bans auto-expire automatically.
             </p>
           </div>
 
@@ -1012,7 +1062,7 @@ export default function AdminDashboard() {
               onClick={handleConfirmSuspend}
               disabled={actionLoading}
             >
-              {actionLoading ? 'Updating...' : 'Confirm Hold'}
+              {actionLoading ? 'Updating...' : banDuration === 'permanent' ? 'Confirm Permanent Ban' : `Ban for ${banDuration}`}
             </Button>
           </DialogFooter>
         </DialogContent>

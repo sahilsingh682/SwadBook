@@ -211,44 +211,46 @@ STRICT GUIDELINES:
       preparation_time: r.preparation_time,
     }));
 
-    // STEP 3 (GENERATE): Call Google Gemini API with augmented context
+    // STEP 3 (GENERATE): Call Google Gemini API with augmented context (tries newest models first)
     if (GEMINI_API_KEY) {
-      try {
-        const contents = messages.map((m) => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
-        }));
+      const contents = messages.map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
 
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents,
-              systemInstruction: { parts: [{ text: systemPrompt }] },
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 1000,
-              }
-            })
-          }
-        );
+      for (const model of ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents,
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                  temperature: 0.6,
+                  maxOutputTokens: 1000,
+                }
+              })
+            }
+          );
 
-        if (response.ok) {
-          const geminiData = await response.json();
-          const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (reply) {
-            return new Response(
-              JSON.stringify({ response: reply, sources, rag_enabled: true }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
+          if (response.ok) {
+            const geminiData = await response.json();
+            const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (reply) {
+              return new Response(
+                JSON.stringify({ response: reply, sources, rag_enabled: true, model }),
+                { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              );
+            }
+          } else {
+            console.error(`Gemini (${model}) status:`, response.status, await response.text());
           }
-        } else {
-          console.error('Google Gemini API status:', response.status, await response.text());
+        } catch (err) {
+          console.error(`Gemini (${model}) fetch error:`, err);
         }
-      } catch (err) {
-        console.error('Gemini API fetch error:', err);
       }
     }
 

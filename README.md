@@ -269,10 +269,10 @@ Add these public variables in **Vercel → Project Settings → Environment Vari
 
 | Key | Value |
 | :--- | :--- |
-| `VITE_SUPABASE_URL` | `https://rxtzrpvaaumxwtulkmgy.supabase.co` |
-| `VITE_SUPABASE_ANON_KEY` | `sb_publishable_xd8azLJGtiDPYQyKPRSKrw_JUS6BfO2` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_xd8azLJGtiDPYQyKPRSKrw_JUS6BfO2` |
-| `VITE_SUPABASE_PROJECT_ID` | `rxtzrpvaaumxwtulkmgy` |
+| `VITE_SUPABASE_URL` | `https://<your-project-ref>.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | `<your-supabase-anon-or-publishable-key>` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `<your-supabase-anon-or-publishable-key>` |
+| `VITE_SUPABASE_PROJECT_ID` | `<your-project-ref>` |
 
 > **Note**: Never expose `sb_secret_...` or `GEMINI_API_KEY` in `VITE_*` variables. Keep `GEMINI_API_KEY` inside **Supabase Dashboard → Edge Functions → Secrets**.
 

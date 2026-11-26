@@ -71,10 +71,10 @@ frontend/
 Configure `.env` in the `frontend/` directory (or use root `.env`):
 
 ```env
-VITE_SUPABASE_PROJECT_ID="rxtzrpvaaumxwtulkmgy"
-VITE_SUPABASE_PUBLISHABLE_KEY="sb_publishable_xd8azLJGtiDPYQyKPRSKrw_JUS6BfO2"
-VITE_SUPABASE_ANON_KEY="sb_publishable_xd8azLJGtiDPYQyKPRSKrw_JUS6BfO2"
-VITE_SUPABASE_URL="https://rxtzrpvaaumxwtulkmgy.supabase.co"
+VITE_SUPABASE_PROJECT_ID="<your-project-ref>"
+VITE_SUPABASE_PUBLISHABLE_KEY="<your-supabase-anon-or-publishable-key>"
+VITE_SUPABASE_ANON_KEY="<your-supabase-anon-or-publishable-key>"
+VITE_SUPABASE_URL="https://<your-project-ref>.supabase.co"
 ```
 
 ---

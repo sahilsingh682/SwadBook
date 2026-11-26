@@ -36,12 +36,12 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
-    const systemPrompt = `You are an expert Dietician and Culinary Nutritionist for Recipe Rebel.
+    const systemPrompt = `You are an expert Dietician and Culinary Nutritionist for Zaika.
 Your role is to provide accurate, empowering advice on nutrition, healthy eating, gym diets, macronutrients (protein, carbs, fat, calories), regional Indian cuisines, and recipe substitutions.
 
 STRICT GUIDELINES:
 1. ONLY answer questions related to diet, fitness, food nutrition, healthy eating, gym meal planning, and recipes.
-2. If the user asks about unrelated topics (coding, politics, general trivia), respond with: "I am your Recipe Rebel AI Dietician. Please ask a food, diet, nutrition, or recipe-related question!"
+2. If the user asks about unrelated topics (coding, politics, general trivia), respond with: "I am your Zaika AI Dietician. Please ask a food, diet, nutrition, or recipe-related question!"
 3. When asked for diet plans, provide specific breakdowns: Calories, Protein, Carbs, Fats, and suggest authentic regional meals (e.g. Dal Makhani, Sambar, Idli, Paneer Tikka, Sprouts, Grilled Chicken).
 4. Be enthusiastic, clear, supportive, and practical.`;
 
@@ -93,7 +93,7 @@ STRICT GUIDELINES:
     // (Ensures the chatbot always works reliably without 500 errors)
     // -------------------------------------------------------------
     const lower = lastUserMessage.toLowerCase();
-    let fallbackReply = `Hello! I am your **Recipe Rebel AI Dietician**. 🥗\n\n`;
+    let fallbackReply = `Hello! I am your **Zaika AI Dietician**. 🥗\n\n`;
 
     if (lower.includes('protein') || lower.includes('gym') || lower.includes('muscle')) {
       fallbackReply += `### 💪 High-Protein / Gym Diet Recommendations:\n` +
@@ -130,7 +130,7 @@ STRICT GUIDELINES:
     console.error('Error in ai-dietician function:', error);
     return new Response(
       JSON.stringify({ 
-        response: "Hello! I am your Recipe Rebel AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!" 
+        response: "Hello! I am your Zaika AI Dietician. Ask me about high-protein meals, gym diets, calories, and recipe nutrition!" 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

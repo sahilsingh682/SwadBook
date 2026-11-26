@@ -1,6 +1,6 @@
-# Recipe Rebel — Frontend Application
+# Zaika — Frontend Application
 
-This directory contains the client-side single page application (SPA) for **Recipe Rebel**, built with React 18, Vite 5, TypeScript 5, Tailwind CSS 3, and shadcn/ui.
+This directory contains the client-side Progressive Web App (PWA) for **Zaika**, built with React 18, Vite 5, TypeScript 5, Tailwind CSS 3, and shadcn/ui.
 
 ---
 

@@ -1,9 +1,9 @@
 <div align="center">
 
-# 🍳 Recipe Rebel
+# 🍲 Zaika
 
-### **Cook Bold. Rebel Different.**
-*A full-stack regional culinary discovery, macro-nutrition tracking, and AI-powered meal planning platform built with React 18, Vite 5, Supabase (PostgreSQL 15), and Google Gemini.*
+### **Bold Flavors. Smart Macros.**
+*A full-stack regional culinary discovery, macro-nutrition tracking, PWA-enabled, and AI-powered meal planning platform built with React 18, Vite 5, Supabase (PostgreSQL 15), and Google Gemini.*
 
 [![Live Demo](https://img.shields.io/badge/Live_App-reciperebel.vercel.app-EA580C?style=for-the-badge&logo=vercel&logoColor=white)](https://reciperebel.vercel.app)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -13,7 +13,7 @@
 
 <br />
 
-<img src="docs/screenshots/home-hero.png" alt="Recipe Rebel Landing Hero" width="100%" />
+<img src="docs/screenshots/home-hero.png" alt="Zaika Landing Hero" width="100%" />
 
 </div>
 
@@ -71,7 +71,7 @@
 
 ## 🌟 Overview
 
-**Recipe Rebel** bridges authentic regional Indian cuisine with modern fitness nutrition. Guests can explore curated state dishes, inspect macro profiles, and consult the floating **AI Dietician** without creating an account — while registered users can upload recipes, leave star ratings and comments, save favorites, and manage their culinary dashboard. Administrators moderate submissions and enforce community guidelines from a dedicated `/admin` console.
+**Zaika** bridges authentic regional Indian cuisine with modern fitness nutrition. Guests can explore curated state dishes, inspect macro profiles, install the app as a **Progressive Web App (PWA)**, and consult the floating **AI Dietician** without creating an account — while registered users can upload recipes, leave star ratings and comments, save favorites, and manage their culinary dashboard. Administrators moderate submissions and enforce community guidelines from a dedicated `/admin` console.
 
 ---
 

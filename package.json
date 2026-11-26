@@ -1,8 +1,8 @@
 {
-  "name": "recipe-rebel",
+  "name": "zaika",
   "private": true,
   "version": "1.0.0",
-  "description": "Recipe Rebel - Fullstack AI-Powered Community Recipe Platform",
+  "description": "Zaika - Fullstack Regional Cuisine, Macros & AI Dietician Platform",
   "workspaces": [
     "frontend"
   ],

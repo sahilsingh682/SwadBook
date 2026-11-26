@@ -1,6 +1,6 @@
-# Recipe Rebel — Backend & Database (Supabase)
+# Zaika — Backend & Database (Supabase)
 
-This directory contains the database schema, SQL migrations, seed data, storage policies, and serverless Edge Functions for **Recipe Rebel**.
+This directory contains the database schema, SQL migrations, seed data, storage policies, and serverless Edge Functions for **Zaika**.
 
 ---
 

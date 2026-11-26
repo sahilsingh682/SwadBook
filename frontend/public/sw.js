@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recipe-rebel-v1';
+const CACHE_NAME = 'zaika-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',

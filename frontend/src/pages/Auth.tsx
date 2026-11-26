@@ -146,17 +146,28 @@ export default function Auth() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
         <div className="relative z-10 flex flex-col justify-end p-12 pb-16">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="h-5 w-5 text-accent" />
-            <span className="text-accent text-sm font-medium tracking-wide uppercase">AI-Powered Platform</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 w-fit mb-4">
+            <Sparkles className="h-4 w-4 text-amber-300" />
+            <span className="text-amber-200 text-xs font-semibold tracking-wide uppercase">India&apos;s Shared Recipe Book</span>
           </div>
           <h1 className="text-5xl font-display text-white leading-tight mb-4">
-            Cook Bold.<br />
-            <span className="text-primary">Rebel Different.</span>
+            Taste India.<br />
+            <span className="text-amber-400">Share Recipes.</span>
           </h1>
-          <p className="text-white/70 text-lg max-w-md leading-relaxed">
-            Share your recipes, discover new flavors, and get personalized diet advice from our AI Dietician.
+          <p className="text-white/80 text-base max-w-md leading-relaxed mb-6">
+            Save your favorite state dishes, publish your own family recipes, and get instant macro &amp; diet advice from our AI Dietician.
           </p>
+          <div className="flex flex-wrap gap-2.5">
+            <span className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium">
+              🍛 38+ Regional Dishes
+            </span>
+            <span className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium">
+              💪 Exact Protein &amp; Macros
+            </span>
+            <span className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-white/90 text-xs font-medium">
+              🤖 AI Dietician Included
+            </span>
+          </div>
         </div>
       </div>
 

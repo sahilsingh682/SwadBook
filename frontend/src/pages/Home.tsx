@@ -235,8 +235,8 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] text-foreground">
-                Cook Bold.<br />
-                <span className="text-primary">Rebel Different.</span>
+                Taste India.<br />
+                <span className="text-primary">Share Recipes.</span>
               </h1>
 
               <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -294,12 +294,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Hero Visual Card */}
+            {/* Right Column: Hero Visual Card (Famous Vegetarian Dish) */}
             <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none rounded-3xl overflow-hidden shadow-2xl border border-border/80 bg-card group">
+              <div
+                onClick={() => navigate('/recipe/recipe-punjab-4')}
+                className="relative mx-auto max-w-md lg:max-w-none rounded-3xl overflow-hidden shadow-2xl border border-border/80 bg-card group cursor-pointer"
+              >
                 <img
-                  src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=1000&q=80"
-                  alt="Authentic Amritsari Butter Chicken"
+                  src="https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-punjab-4.jpg"
+                  alt="Authentic Tandoori Paneer Tikka"
                   className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-smooth"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -307,27 +310,27 @@ export default function Home() {
                 {/* Floating Micro-Badge */}
                 <div className="absolute top-4 right-4 backdrop-blur-md bg-black/60 border border-white/20 text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5">
                   <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                  <span>Punjab Classic · 38g Protein</span>
+                  <span>100% Veg · Punjab Classic · 23g Protein</span>
                 </div>
 
                 <div className="absolute bottom-5 left-5 right-5 text-white space-y-1.5">
-                  <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                    Featured Regional Dish
+                  <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">
+                    Featured Vegetarian Dish
                   </span>
                   <h3 className="text-xl font-display font-bold leading-tight">
-                    Amritsari Butter Chicken
+                    Tandoori Paneer Tikka
                   </h3>
                   <div className="flex items-center gap-3 text-xs text-white/80 pt-1">
                     <span className="flex items-center gap-1">
-                      <Flame className="h-3 w-3 text-primary" /> 480 kcal
+                      <Flame className="h-3 w-3 text-primary" /> 294 kcal
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Dumbbell className="h-3 w-3 text-emerald-400" /> 38g Protein
+                      <Dumbbell className="h-3 w-3 text-emerald-400" /> 23g Protein
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-accent text-accent" /> 4.9 Rating
+                      <Star className="h-3 w-3 fill-accent text-accent" /> 4.8 Rating
                     </span>
                   </div>
                 </div>

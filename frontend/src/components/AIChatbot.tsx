@@ -58,17 +58,33 @@ const FOOD_DOMAIN_KEYWORDS = [
 ];
 
 const GREETING_REGEX = /^(hi|hello|hey|hii+|heyy+|namaste|hola|good morning|good afternoon|good evening|sup|yo)[\s!?.]*$/i;
+const ACK_REGEX = /^(ok|okh|okay|kk|k|sure|alright|got it|fine|cool|nice|great|awesome|sounds good|ok sure|okh sure|okay sure)[\s!?.]*$/i;
+const THANKS_REGEX = /^(thanks|thank you|thank u|thx|ty|tysm|bye|goodbye|see ya)[\s!?.]*$/i;
 
 async function smartRagResponse(query: string): Promise<{ response: string; sources: RecipeSource[] }> {
   const trimmed = query.trim();
   const q = trimmed.toLowerCase();
 
-  // 1. Handle greetings cleanly
+  // 1. Handle greetings, acknowledgments, and thanks naturally
   if (GREETING_REGEX.test(trimmed)) {
     return {
       response:
         `👋 Hello! Welcome to **Zaika**!\n\n` +
         `Ask me about any dish on Zaika (like *Classic Dal Makhani* or *Amritsari Butter Chicken*), protein & calorie breakdowns, or personalized gym & weight-loss meal plans.`,
+      sources: [],
+    };
+  }
+
+  if (THANKS_REGEX.test(trimmed)) {
+    return {
+      response: `You're very welcome! 😊 Anytime you want a Zaika recipe, macro check, or meal plan, just ask!`,
+      sources: [],
+    };
+  }
+
+  if (ACK_REGEX.test(trimmed)) {
+    return {
+      response: `Sounds good! 👍 What dish, regional cuisine, or fitness goal would you like to explore today?`,
       sources: [],
     };
   }

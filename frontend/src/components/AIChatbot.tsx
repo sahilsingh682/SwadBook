@@ -58,12 +58,16 @@ const FOOD_DOMAIN_KEYWORDS = [
 ];
 
 const GREETING_REGEX = /^(hi|hello|hey|hii+|heyy+|namaste|hola|good morning|good afternoon|good evening|sup|yo)[\s!?.]*$/i;
-const ACK_REGEX = /^(ok|okh|okay|kk|k|sure|alright|got it|fine|cool|nice|great|awesome|sounds good|ok sure|okh sure|okay sure)[\s!?.]*$/i;
-const THANKS_REGEX = /^(thanks|thank you|thank u|thx|ty|tysm|bye|goodbye|see ya)[\s!?.]*$/i;
+const THANKS_WORDS = ['thanks', 'thank', 'thx', 'ty', 'tysm', 'bye', 'goodbye'];
+const ACK_WORDS = [
+  'ok', 'okh', 'okay', 'kk', 'sure', 'alright', 'understood', 'got', 'fine',
+  'cool', 'nice', 'great', 'awesome', 'yes', 'yep', 'yeah', 'np', 'sense',
+];
 
 async function smartRagResponse(query: string): Promise<{ response: string; sources: RecipeSource[] }> {
   const trimmed = query.trim();
   const q = trimmed.toLowerCase();
+  const words = q.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
 
   // 1. Handle greetings, acknowledgments, and thanks naturally
   if (GREETING_REGEX.test(trimmed)) {
@@ -75,18 +79,22 @@ async function smartRagResponse(query: string): Promise<{ response: string; sour
     };
   }
 
-  if (THANKS_REGEX.test(trimmed)) {
-    return {
-      response: `You're very welcome! 😊 Anytime you want a Zaika recipe, macro check, or meal plan, just ask!`,
-      sources: [],
-    };
-  }
+  const hasDomainKeywordPre = FOOD_DOMAIN_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
+  const hasOffTopicPre = OFF_TOPIC_KEYWORDS.some((kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q));
 
-  if (ACK_REGEX.test(trimmed)) {
-    return {
-      response: `Sounds good! 👍 What dish, regional cuisine, or fitness goal would you like to explore today?`,
-      sources: [],
-    };
+  if (!hasDomainKeywordPre && !hasOffTopicPre && words.length <= 6) {
+    if (words.some((w) => THANKS_WORDS.includes(w))) {
+      return {
+        response: `You're very welcome! 😊 Anytime you want a Zaika recipe, macro check, or meal plan, just ask!`,
+        sources: [],
+      };
+    }
+    if (words.some((w) => ACK_WORDS.includes(w))) {
+      return {
+        response: `Sounds good! 👍 What dish, regional cuisine, or fitness goal would you like to explore today?`,
+        sources: [],
+      };
+    }
   }
 
   // 2. Explicit off-topic check (politics, trivia, coding, etc.)

@@ -38,7 +38,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 14,
     fat: 30,
     average_rating: 4.9,
-    image_url: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-punjab-1.jpg",
     ingredients: [
       "750g Boneless Chicken Thighs (4 servings)",
       "1 cup (240g) Thick Hung Curd / Yogurt",
@@ -74,7 +74,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 40,
     fat: 14,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-punjab-2.jpg",
     ingredients: [
       "1 cup (200g) Whole Black Urad Dal (soaked overnight)",
       "1/4 cup (50g) Red Kidney Beans (Rajma)",
@@ -109,7 +109,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 68,
     fat: 21,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Chole_Bhature_1.jpg/960px-Chole_Bhature_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-punjab-3.jpg",
     ingredients: [
       "1.5 cups (270g) Dried Kabuli Chana (soaked overnight)",
       "2 cups (250g) All-Purpose Flour (Maida) + 2 tbsp Semolina",
@@ -144,7 +144,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 10,
     fat: 18,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-punjab-4.jpg",
     ingredients: [
       "350g Firm Paneer (cut into 1.5-inch cubes)",
       "1 cup (150g) Green & Red Bell Peppers (diced)",
@@ -182,7 +182,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 44,
     fat: 11,
     average_rating: 4.9,
-    image_url: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-maha-1.jpg",
     ingredients: [
       "4 medium (400g) Boiled & Mashed Potatoes",
       "4 Fresh Ladi Pav Buns",
@@ -215,7 +215,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 51,
     fat: 12,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-maha-2.jpg",
     ingredients: [
       "1.5 cups (220g) Sprouted Moth Beans (Matki)",
       "2 medium (160g) Onions (100g for gravy + 60g for garnish)",
@@ -248,7 +248,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 42,
     fat: 8,
     average_rating: 4.7,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Kanda_Poha-Diu-DSC003.jpg/960px-Kanda_Poha-Diu-DSC003.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-maha-3.jpg",
     ingredients: [
       "2 cups (180g) Thick Poha (Flattened Rice)",
       "1 large (120g) Onion finely chopped",
@@ -282,7 +282,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 54,
     fat: 10,
     average_rating: 4.7,
-    image_url: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-maha-4.jpg",
     ingredients: [
       "1 cup (180g) Sabudana (Tapioca Pearls, soaked 5 hours)",
       "1/3 cup (45g) Roasted Peanuts (coarsely crushed)",
@@ -319,7 +319,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 56,
     fat: 9,
     average_rating: 4.9,
-    image_url: "https://images.unsplash.com/photo-1630383249896-424e482df921?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-south-1.jpg",
     ingredients: [
       "2 cups (450g) Fermented Rice & Urad Dal Dosa Batter",
       "3 medium (300g) Boiled Potatoes (mashed coarsely)",
@@ -353,7 +353,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 9,
     fat: 23,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-south-2.jpg",
     ingredients: [
       "700g Bone-in Chicken (curry cut, 4 servings)",
       "150g Shallots (Madras Onions) finely sliced",
@@ -387,7 +387,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 38,
     fat: 4,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Idli_Sambar-Noida-UP-SP004.jpg/960px-Idli_Sambar-Noida-UP-SP004.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-south-3.jpg",
     ingredients: [
       "3 cups (600g) Fermented Idli Batter (3:1 Rice to Urad Dal)",
       "1/2 cup (100g) Toor Dal (cooked soft)",
@@ -419,7 +419,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 52,
     fat: 12,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Pongalpot.jpg/960px-Pongalpot.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-south-4.jpg",
     ingredients: [
       "1 cup (200g) Raw Sona Masoori Rice",
       "1/3 cup (70g) Split Yellow Moong Dal",
@@ -455,7 +455,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 56,
     fat: 18,
     average_rating: 4.9,
-    image_url: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-andhra-1.jpg",
     ingredients: [
       "700g Chicken Drumsticks & Thighs",
       "2 cups (380g) Aged Basmati Rice (soaked 30 mins)",
@@ -488,7 +488,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 34,
     fat: 5,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-andhra-2.jpg",
     ingredients: [
       "1.5 cups (280g) Whole Green Moong Dal (soaked 6 hours)",
       "2 tbsp (25g) Raw Rice (for extra crispness)",
@@ -519,7 +519,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 20,
     fat: 18,
     average_rating: 4.8,
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/1/12/Gutti-vankaya_kura.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-andhra-3.jpg",
     ingredients: [
       "400g Small Purple Brinjals (Eggplants, slit in a cross)",
       "3 tbsp (30g) Roasted Peanuts & 2 tbsp White Sesame Seeds",
@@ -550,7 +550,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 6,
     fat: 20,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Andhra_Fried_Chicken.JPG/960px-Andhra_Fried_Chicken.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-andhra-4.jpg",
     ingredients: [
       "700g Boneless or Small-Cut Chicken",
       "1 medium (100g) Onion finely sliced",
@@ -587,7 +587,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 76,
     fat: 21,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/%22Delectable_Dal_Baati_Churma%22.jpg/960px-%22Delectable_Dal_Baati_Churma%22.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-raj-1.jpg",
     ingredients: [
       "2 cups (240g) Coarse Whole Wheat Flour (Atta) + 2 tbsp Semolina",
       "1 cup (180g) Panchmel Dal (Toor, Moong, Masoor, Chana, Urad)",
@@ -619,7 +619,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 7,
     fat: 30,
     average_rating: 4.8,
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/9/97/Laal-Maans.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-raj-2.jpg",
     ingredients: [
       "750g Bone-in Goat Mutton (curry cut)",
       "8–10 Dried Mathania Red Chillies (soaked & ground to paste)",
@@ -651,7 +651,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 34,
     fat: 14,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/Besan_Gatta_curry03.jpg/960px-Besan_Gatta_curry03.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-raj-3.jpg",
     ingredients: [
       "1.5 cups (180g) Besan (Gram Flour)",
       "1 cup (240g) Whisked Yogurt",
@@ -683,7 +683,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 22,
     fat: 11,
     average_rating: 4.7,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/KerSangri.JPG/960px-KerSangri.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-raj-4.jpg",
     ingredients: [
       "1 cup (120g) Dried Ker & Sangri (soaked overnight & boiled)",
       "2 tbsp (30ml) Mustard Oil or Ghee",
@@ -718,7 +718,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 10,
     fat: 16,
     average_rating: 4.8,
-    image_url: "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-bengal-1.jpg",
     ingredients: [
       "600g Rohu or Katla Fish Steaks (4 pieces)",
       "2 tbsp (30ml) Cold-Pressed Mustard Oil",
@@ -750,7 +750,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 42,
     fat: 18,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Kati_Roll_Company%2C_Soho%2C_London_%282809874428%29.jpg/960px-Kati_Roll_Company%2C_Soho%2C_London_%282809874428%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-bengal-2.jpg",
     ingredients: [
       "350g Boneless Chicken Breast (cut into strips)",
       "3 Flaky Parathas (Whole Wheat or Lachha)",
@@ -782,7 +782,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 8,
     fat: 22,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Chingri_Macher_Malai_Curry.jpg/960px-Chingri_Macher_Malai_Curry.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-bengal-3.jpg",
     ingredients: [
       "600g Large Tiger Prawns (deveined, shell-on tail)",
       "1.5 cups (360ml) Thick Coconut Milk",
@@ -814,7 +814,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 32,
     fat: 14,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Aloo_Posto.jpg/960px-Aloo_Posto.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-bengal-4.jpg",
     ingredients: [
       "450g Potatoes (peeled and cut into 1-inch cubes)",
       "4 tbsp (40g) White Poppy Seeds (Posto, soaked 1 hour)",
@@ -850,7 +850,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 28,
     fat: 5,
     average_rating: 4.9,
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/4/40/Gujarati_Dhokla_%28Khaman_Dhokla%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-gujarat-1.jpg",
     ingredients: [
       "1.5 cups (180g) Fine Besan (Gram Flour, sifted)",
       "1 tbsp Lemon Juice, 1 tsp Ginger-Chilli Paste & 1/4 tsp Turmeric",
@@ -882,7 +882,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 38,
     fat: 8,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Masala_thepla_with_Methi_kela.JPG/960px-Masala_thepla_with_Methi_kela.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-gujarat-2.jpg",
     ingredients: [
       "2 cups (240g) Whole Wheat Flour (Atta)",
       "1 cup (60g) Fresh Fenugreek Leaves (Methi, finely chopped)",
@@ -914,7 +914,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 36,
     fat: 15,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Chapdi_Undhiyu_%28Tavo%29.JPG/960px-Chapdi_Undhiyu_%28Tavo%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-gujarat-3.jpg",
     ingredients: [
       "250g Surti Papdi (Flat Beans), 150g Purple Yam & 150g Baby Potatoes",
       "100g Methi Muthiya (steamed/lightly fried fenugreek dumplings)",
@@ -946,7 +946,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 36,
     fat: 8,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Handavo3.jpg/960px-Handavo3.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-gujarat-4.jpg",
     ingredients: [
       "1 cup (180g) Rice + 1/2 cup (90g) Mixed Chana, Toor & Urad Dal (soaked & fermented)",
       "1 cup (120g) Grated Bottle Gourd (Lauki) & 1/2 cup Grated Carrot",
@@ -981,7 +981,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 8,
     fat: 27,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Mutton_rogan_josh.jpg/960px-Mutton_rogan_josh.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-kashmir-1.jpg",
     ingredients: [
       "750g Lamb / Mutton Shoulder (bone-in, 4 servings)",
       "3 tbsp (45ml) Mustard Oil or Ghee",
@@ -1013,7 +1013,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 38,
     fat: 12,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Dum_Aloo_Kashmiri.jpg/960px-Dum_Aloo_Kashmiri.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-kashmir-2.jpg",
     ingredients: [
       "500g Baby Potatoes (par-boiled, peeled & pricked with a fork)",
       "1 cup (240g) Whisked Yogurt",
@@ -1045,7 +1045,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 52,
     fat: 14,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Chicken_Yakhni_Pulao.jpg/960px-Chicken_Yakhni_Pulao.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-kashmir-3.jpg",
     ingredients: [
       "650g Bone-in Chicken",
       "2 cups (380g) Basmati Rice (soaked 30 mins)",
@@ -1081,7 +1081,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 10,
     fat: 19,
     average_rating: 4.9,
-    image_url: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=80",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-goa-1.jpg",
     ingredients: [
       "600g Pomfret or Kingfish Steaks (4 servings)",
       "1 cup (100g) Fresh Grated Coconut",
@@ -1113,7 +1113,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 7,
     fat: 18,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Cafreal.jpg/960px-Cafreal.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-goa-2.jpg",
     ingredients: [
       "700g Chicken Drumsticks & Thighs (slashed)",
       "1.5 cups (60g) Fresh Coriander Leaves + 1/2 cup Mint Leaves",
@@ -1145,7 +1145,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 9,
     fat: 14,
     average_rating: 4.8,
-    image_url: "https://upload.wikimedia.org/wikipedia/commons/f/f6/Balch%C3%A3o_de_camar%C3%A3o.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-goa-3.jpg",
     ingredients: [
       "550g Cleaned & Deveined Medium Prawns",
       "6 Kashmiri Red Chillies & 1 tsp Cumin Seeds",
@@ -1180,7 +1180,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 44,
     fat: 10,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Aloo_Mutter_tikki_chaat_%281%29.JPG/960px-Aloo_Mutter_tikki_chaat_%281%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-up-1.jpg",
     ingredients: [
       "4 medium (400g) Boiled Potatoes (mashed)",
       "1/2 cup (75g) Boiled Green Peas (lightly crushed)",
@@ -1212,7 +1212,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 6,
     fat: 21,
     average_rating: 4.9,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Mouth_Watering_Gauloti_Kababs.jpg/960px-Mouth_Watering_Gauloti_Kababs.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-up-2.jpg",
     ingredients: [
       "600g Fine Minced Lamb or Chicken",
       "2 tbsp Raw Papaya Paste (natural tenderizer)",
@@ -1244,7 +1244,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 58,
     fat: 16,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Puri_Bhaji.JPG/960px-Puri_Bhaji.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-up-3.jpg",
     ingredients: [
       "2 cups (240g) Whole Wheat Flour + 1/3 cup (60g) Coarse Urad Dal Paste",
       "4 medium (400g) Boiled Potatoes (roughly broken)",
@@ -1275,7 +1275,7 @@ export const FAMOUS_RECIPES: FamousRecipe[] = [
     carbs: 60,
     fat: 12,
     average_rating: 4.8,
-    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Awadhi_Vegetable_Biryani.jpg/960px-Awadhi_Vegetable_Biryani.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    image_url: "https://rxtzrpvaaumxwtulkmgy.supabase.co/storage/v1/object/public/recipe-images/curated/recipe-up-4.jpg",
     ingredients: [
       "2 cups (380g) Long-Grain Basmati Rice (soaked 30 mins)",
       "350g Mixed Carrot, Beans, Cauliflower, Peas & 100g Paneer Cubes",

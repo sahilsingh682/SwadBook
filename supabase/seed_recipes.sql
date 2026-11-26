@@ -55,9 +55,14 @@ BEGIN
   VALUES (master_chef_id, 'Master Chef Rebel', 'active')
   ON CONFLICT (id) DO UPDATE SET name = 'Master Chef Rebel';
 
-  INSERT INTO public.user_roles (user_id, role)
-  VALUES (master_chef_id, 'admin')
-  ON CONFLICT (user_id, role) DO NOTHING;
+  INSERT INTO public.user_roles (user_id, role, user_name, user_email)
+  VALUES (master_chef_id, 'admin', 'Master Chef Rebel', 'masterchef@reciperebel.com')
+  ON CONFLICT (user_id, role) DO UPDATE
+    SET user_name = EXCLUDED.user_name,
+        user_email = EXCLUDED.user_email;
+
+  -- Remove any older/stale seeded recipes from previous runs so no wrong/duplicate data remains
+  DELETE FROM public.recipes WHERE author_id = master_chef_id;
 
   INSERT INTO public.recipes (
     id, title, description, state, dietary_type, meal_type, tags,

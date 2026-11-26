@@ -263,7 +263,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleModerateRecipe = async (recipeId: string, status: 'approved' | 'rejected') => {
+  const handleModerateRecipe = async (recipeId: string, status: 'pending' | 'approved' | 'rejected') => {
     try {
       const { error } = await supabase
         .from('recipes')
@@ -275,7 +275,9 @@ export default function AdminDashboard() {
       toast.success(
         status === 'approved'
           ? 'Recipe approved & published to platform!'
-          : 'Recipe rejected & hidden from public view'
+          : status === 'pending'
+            ? 'Recipe moved to pending review queue'
+            : 'Recipe rejected & hidden from public view'
       );
       setRecipes((prev) =>
         prev.map((r) => (r.id === recipeId ? { ...r, status } : r))
@@ -829,6 +831,18 @@ export default function AdminDashboard() {
                               >
                                 <Check className="h-4 w-4" />
                                 <span>Approve</span>
+                              </Button>
+                            )}
+
+                            {recipe.status !== 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleModerateRecipe(recipe.id, 'pending')}
+                                className="h-9 gap-1.5 text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+                              >
+                                <Clock className="h-4 w-4" />
+                                <span>Set Pending</span>
                               </Button>
                             )}
 

@@ -2,10 +2,11 @@ import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Home, Upload, User, LogOut, Shield, AlertTriangle, Sparkles } from 'lucide-react';
+import { ChefHat, Home, Upload, User, LogOut, Shield, AlertTriangle } from 'lucide-react';
 import { AIChatbot } from './AIChatbot';
 import { AuthPromptDialog } from './AuthPromptDialog';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
+import { BrandLogo } from './BrandLogo';
 
 interface LayoutProps {
   children: ReactNode;
@@ -54,13 +55,8 @@ export function Layout({ children }: LayoutProps) {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-xl supports-[backdrop-filter]:bg-card/70">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-smooth">
-              <ChefHat className="h-5 w-5 text-primary" />
-            </div>
-            <span className="font-display text-xl font-bold tracking-tight">
-              Recipe <span className="text-primary">Rebel</span>
-            </span>
+          <Link to="/" className="group transition-smooth hover:opacity-95">
+            <BrandLogo size="md" />
           </Link>
 
           {/* Navigation Links */}
@@ -231,14 +227,9 @@ export function Layout({ children }: LayoutProps) {
       <footer className="border-t bg-card mt-auto">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <ChefHat className="h-4 w-4 text-primary" />
-              <span className="font-display font-semibold text-sm">
-                Recipe <span className="text-primary">Rebel</span>
-              </span>
-            </div>
+            <BrandLogo size="sm" />
             <p className="text-xs text-muted-foreground">
-              Cook Bold. Rebel Different. &nbsp;·&nbsp; © {new Date().getFullYear()} Recipe Rebel. All rights reserved.
+              Bold Flavors. Smart Macros. &nbsp;·&nbsp; © {new Date().getFullYear()} Zaika. All rights reserved.
             </p>
           </div>
         </div>

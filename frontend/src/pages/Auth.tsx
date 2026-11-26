@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { ChefHat, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import { BrandLogo } from '@/components/BrandLogo';
 import authHero from '@/assets/auth-hero.jpg';
 
 function PasswordInput({ id, value, onChange, placeholder, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
@@ -164,14 +165,14 @@ export default function Auth() {
         <div className="w-full max-w-md space-y-8">
           {/* Logo + Brand */}
           <div className="text-center space-y-3">
-            <div className="inline-flex h-14 w-14 rounded-2xl bg-primary/10 items-center justify-center mx-auto">
-              <ChefHat className="h-7 w-7 text-primary" />
+            <div className="flex justify-center">
+              <BrandLogo size="lg" showText={false} />
             </div>
             <div>
-              <h2 className="text-2xl font-display tracking-tight">
-                Recipe <span className="text-primary">Rebel</span>
+              <h2 className="text-2xl font-display font-bold tracking-tight">
+                Zai<span className="text-primary">ka</span>
               </h2>
-              <p className="text-muted-foreground text-sm mt-1">Your culinary journey starts here</p>
+              <p className="text-muted-foreground text-sm mt-1">Your culinary &amp; macro journey starts here</p>
             </div>
           </div>
 

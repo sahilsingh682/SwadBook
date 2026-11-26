@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw error;
     }
 
-    toast.success('Welcome back to Recipe Rebel!');
+    toast.success('Welcome back to Zaika!');
     navigate('/');
   };
 

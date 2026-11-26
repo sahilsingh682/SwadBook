@@ -599,7 +599,7 @@ export default function Home() {
               Trust & Transparency
             </span>
             <h2 className="text-3xl font-display font-bold">
-              Why Food Lovers Choose Recipe Rebel
+              Why Food Lovers Choose Zaika
             </h2>
             <p className="text-sm text-muted-foreground">
               Every dish is authenticated, tagged with nutritional macros, and paired with smart AI culinary assistance.

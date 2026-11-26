@@ -48,7 +48,7 @@ export function PWAInstallPrompt() {
     const handleAppInstalled = () => {
       setIsVisible(false);
       setDeferredPrompt(null);
-      toast.success('Recipe Rebel app installed!');
+      toast.success('Zaika app installed!');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -91,7 +91,7 @@ export function PWAInstallPrompt() {
       return;
     }
 
-    toast.info('To install Recipe Rebel, click the install icon in your browser address bar or menu ("Install app").', {
+    toast.info('To install Zaika, click the install icon in your browser address bar or menu ("Install app").', {
       duration: 5000,
     });
   };
@@ -103,14 +103,14 @@ export function PWAInstallPrompt() {
       <div className="flex items-start gap-3">
         <img
           src="/icons/icon-192.png"
-          alt="Recipe Rebel App"
+          alt="Zaika App"
           className="h-12 w-12 rounded-xl shadow-sm flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
               <h4 className="font-display font-bold text-sm leading-tight">
-                Download Recipe Rebel App
+                Download Zaika App
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Get instant access, offline recipes &amp; AI Dietician on your home screen.

@@ -2,11 +2,12 @@ import { ReactNode, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { ChefHat, Home, Upload, User, LogOut, Shield, AlertTriangle } from 'lucide-react';
+import { Home, Upload, User, LogOut, Shield, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { AIChatbot } from './AIChatbot';
 import { AuthPromptDialog } from './AuthPromptDialog';
 import { PWAInstallPrompt } from './PWAInstallPrompt';
 import { BrandLogo } from './BrandLogo';
+import { useIsStandalone } from '@/hooks/use-standalone';
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,7 +17,18 @@ export function Layout({ children }: LayoutProps) {
   const { user, isAdmin, isSuspended, suspensionReason, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isStandalone = useIsStandalone();
   const isAuthPage = location.pathname === '/auth' || location.pathname === '/reset-password';
+  const isHomePage = location.pathname === '/';
+
+  const getAppPageTitle = () => {
+    if (location.pathname.startsWith('/recipe/') && location.pathname.endsWith('/edit')) return 'Edit Recipe';
+    if (location.pathname.startsWith('/recipe/')) return 'Recipe Details';
+    if (location.pathname === '/upload') return 'Share Recipe';
+    if (location.pathname === '/dashboard') return 'My Kitchen';
+    if (location.pathname === '/admin') return 'Admin Console';
+    return 'SwadBook';
+  };
 
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authDialogAction, setAuthDialogAction] = useState<'upload' | 'general'>('general');
@@ -52,12 +64,29 @@ export function Layout({ children }: LayoutProps) {
         </div>
       )}
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-card/85 backdrop-blur-xl supports-[backdrop-filter]:bg-card/70">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="group transition-smooth hover:opacity-95">
-            <BrandLogo size="md" />
-          </Link>
+      {/* Header (Native App Top Bar in standalone PWA, web navbar in browser) */}
+      <header className="sticky top-0 z-40 border-b bg-card/90 backdrop-blur-xl supports-[backdrop-filter]:bg-card/75 pt-safe">
+        <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
+          {isStandalone && !isHomePage ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="h-9 w-9 rounded-full active:scale-95"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <span className="font-display text-lg font-bold tracking-tight">
+                {getAppPageTitle()}
+              </span>
+            </div>
+          ) : (
+            <Link to="/" className="group transition-smooth hover:opacity-95 active:scale-95">
+              <BrandLogo size={isStandalone ? 'sm' : 'md'} />
+            </Link>
+          )}
 
           {/* Navigation Links */}
           <nav className="flex items-center gap-1 sm:gap-2">
@@ -149,53 +178,57 @@ export function Layout({ children }: LayoutProps) {
       {/* PWA Download / Install Popup */}
       <PWAInstallPrompt />
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Mobile / PWA App Bottom Navigation Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        className={`${isStandalone ? 'flex' : 'md:hidden flex'} fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/85 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] pb-safe select-none`}
       >
-        <div className="flex items-center justify-around h-16 px-2">
+        <div className="flex items-center justify-around h-16 w-full px-2 max-w-xl mx-auto">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+            className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-all active:scale-95 ${
               location.pathname === '/' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
+            {location.pathname === '/' && <span className="absolute top-0 w-8 h-0.5 rounded-full bg-primary" />}
             <Home className="h-5 w-5" />
-            <span className="text-[11px] leading-none">Explore</span>
+            <span className="text-[11px] leading-none">Discover</span>
           </button>
 
           <button
             type="button"
             onClick={handleUploadClick}
-            className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+            className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-all active:scale-95 ${
               location.pathname === '/upload' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
+            {location.pathname === '/upload' && <span className="absolute top-0 w-8 h-0.5 rounded-full bg-primary" />}
             <Upload className="h-5 w-5" />
-            <span className="text-[11px] leading-none">Upload</span>
+            <span className="text-[11px] leading-none">Share</span>
           </button>
 
           {user ? (
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+              className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-all active:scale-95 ${
                 location.pathname === '/dashboard' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
+              {location.pathname === '/dashboard' && <span className="absolute top-0 w-8 h-0.5 rounded-full bg-primary" />}
               <User className="h-5 w-5" />
-              <span className="text-[11px] leading-none">Dashboard</span>
+              <span className="text-[11px] leading-none">Kitchen</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={() => navigate('/auth')}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+              className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-all active:scale-95 ${
                 location.pathname === '/auth' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
+              {location.pathname === '/auth' && <span className="absolute top-0 w-8 h-0.5 rounded-full bg-primary" />}
               <User className="h-5 w-5" />
               <span className="text-[11px] leading-none">Sign In</span>
             </button>
@@ -205,10 +238,11 @@ export function Layout({ children }: LayoutProps) {
             <button
               type="button"
               onClick={() => navigate('/admin')}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-colors ${
+              className={`relative flex flex-col items-center justify-center gap-1 flex-1 py-1.5 rounded-xl transition-all active:scale-95 ${
                 location.pathname === '/admin' ? 'text-amber-500 font-semibold' : 'text-amber-500/80 hover:text-amber-500'
               }`}
             >
+              {location.pathname === '/admin' && <span className="absolute top-0 w-8 h-0.5 rounded-full bg-amber-500" />}
               <Shield className="h-5 w-5" />
               <span className="text-[11px] leading-none">Admin</span>
             </button>
@@ -223,17 +257,19 @@ export function Layout({ children }: LayoutProps) {
         action={authDialogAction}
       />
 
-      {/* Footer */}
-      <footer className="border-t bg-card mt-auto">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <BrandLogo size="sm" />
-            <p className="text-xs text-muted-foreground">
-              India&apos;s Shared Recipe Book &nbsp;·&nbsp; © {new Date().getFullYear()} SwadBook. All rights reserved.
-            </p>
+      {/* Footer (Website only — hidden inside installed PWA app for native look) */}
+      {!isStandalone && (
+        <footer className="border-t bg-card mt-auto">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <BrandLogo size="sm" />
+              <p className="text-xs text-muted-foreground">
+                India&apos;s Shared Recipe Book &nbsp;·&nbsp; © {new Date().getFullYear()} SwadBook. All rights reserved.
+              </p>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

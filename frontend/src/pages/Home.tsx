@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
+import { useIsStandalone } from '@/hooks/use-standalone';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,6 +63,7 @@ const HEALTH_GOALS = [
 
 export default function Home() {
   const { user } = useAuth();
+  const isStandalone = useIsStandalone();
   const navigate = useNavigate();
   const recipesSectionRef = useRef<HTMLDivElement>(null);
 
@@ -218,9 +220,65 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* ======================================================== */}
-      {/* 1. HERO SECTION */}
+      {/* 1. NATIVE APP HEADER (PWA) OR WEBSITE HERO (BROWSER) */}
       {/* ======================================================== */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-card via-background to-background pt-5 pb-10 md:py-24 border-b">
+      {isStandalone ? (
+        <section className="pt-4 pb-2 px-4 bg-gradient-to-b from-primary/5 to-background">
+          <div className="container mx-auto max-w-7xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-primary uppercase tracking-wider">
+                  SwadBook Kitchen
+                </p>
+                <h1 className="text-xl font-display font-bold tracking-tight">
+                  Namaste{user?.user_metadata?.name ? `, ${user.user_metadata.name.split(' ')[0]}` : ''}! What are we cooking?
+                </h1>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleUploadClick}
+                className="rounded-full shadow-warm gap-1.5 h-9 px-3.5 text-xs font-semibold active:scale-95"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Share
+              </Button>
+            </div>
+
+            {/* Horizontal State Cuisine Stories (Swiggy/Zomato Style) */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {INDIAN_STATES.map((st) => {
+                const active = stateFilter === st;
+                return (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setStateFilter(st)}
+                    className={`shrink-0 flex flex-col items-center gap-1.5 group active:scale-95 transition-transform`}
+                  >
+                    <div
+                      className={`h-12 w-12 rounded-2xl flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                        active
+                          ? 'bg-primary text-primary-foreground border-primary shadow-warm scale-105'
+                          : 'bg-card text-foreground border-border/80 group-hover:border-primary/40'
+                      }`}
+                    >
+                      {st === 'All States' ? '🇮🇳' : st.slice(0, 2).toUpperCase()}
+                    </div>
+                    <span
+                      className={`text-[11px] max-w-[68px] truncate ${
+                        active ? 'font-bold text-primary' : 'text-muted-foreground font-medium'
+                      }`}
+                    >
+                      {st === 'All States' ? 'All' : st}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="relative overflow-hidden bg-gradient-to-b from-card via-background to-background pt-5 pb-10 md:py-24 border-b">
         <div className="absolute inset-0 opacity-15 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 15% 30%, hsl(24 95% 53% / 0.35), transparent 45%), radial-gradient(circle at 85% 60%, hsl(38 92% 50% / 0.25), transparent 45%)'
         }} />
@@ -339,11 +397,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ======================================================== */}
       {/* 2. LIVE RECIPE EXPLORER & COMPREHENSIVE FILTER ENGINE */}
       {/* ======================================================== */}
-      <section ref={recipesSectionRef} id="explore-recipes" className="py-12 md:py-20">
+      <section ref={recipesSectionRef} id="explore-recipes" className={isStandalone ? 'py-4' : 'py-12 md:py-20'}>
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
@@ -658,9 +717,10 @@ export default function Home() {
       </section>
 
       {/* ======================================================== */}
-      {/* 3. PRODUCT & PLATFORM HIGHLIGHTS */}
+      {/* 3. PRODUCT & PLATFORM HIGHLIGHTS (Website only — hidden in installed PWA) */}
       {/* ======================================================== */}
-      <section className="relative overflow-hidden py-20 bg-gradient-to-b from-background via-card/70 to-background border-t border-b">
+      {!isStandalone && (
+        <section className="relative overflow-hidden py-20 bg-gradient-to-b from-background via-card/70 to-background border-t border-b">
         <div
           className="absolute inset-0 opacity-20 pointer-events-none"
           style={{
@@ -791,6 +851,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Auth Prompt Dialog for Unauthenticated Users */}
       <AuthPromptDialog
